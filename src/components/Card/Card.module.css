@@ -1,0 +1,57 @@
+.card {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  user-select: none;
+}
+
+.card.normal {
+  width: 120px;
+}
+
+.card.small {
+  width: 80px;
+}
+
+.card.large {
+  width: 160px;
+}
+
+.card:hover:not(.disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card.selected {
+  transform: translateY(-8px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  outline: 3px solid #667eea;
+}
+
+.card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cardImage {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.cardName {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.25rem;
+  font-size: 0.7rem;
+  text-align: center;
+  font-weight: 500;
+}

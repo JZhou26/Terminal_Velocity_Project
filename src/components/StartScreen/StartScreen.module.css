@@ -1,0 +1,107 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+}
+
+.content {
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+  color: #667eea;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin: 0 0 2rem 0;
+  font-size: 1.2rem;
+}
+
+.form {
+  margin-bottom: 2rem;
+}
+
+.form h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.inputGroup label {
+  width: 100px;
+  font-weight: 500;
+  color: #555;
+}
+
+.input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.startButton {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.startButton:hover {
+  background: #5568d3;
+}
+
+.rules {
+  background: #f7f7f7;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.rules h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.rules ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.rules li {
+  margin-bottom: 0.5rem;
+  color: #666;
+}

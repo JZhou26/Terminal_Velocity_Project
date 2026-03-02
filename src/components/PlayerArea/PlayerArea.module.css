@@ -1,0 +1,119 @@
+.container {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.container.active {
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  border: 2px solid #667eea;
+  transform: scale(1.01);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.playerName {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.badge {
+  background: #667eea;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.lowPatience {
+  color: #e74c3c;
+}
+
+.upgrades {
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  margin: 0 0 0.75rem 0;
+  color: #555;
+  font-weight: 600;
+}
+
+.upgradeList {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.upgradeCard {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f0f0f0;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ddd;
+}
+
+.upgradeImage {
+  width: 40px;
+  height: auto;
+  border-radius: 0.25rem;
+}
+
+.upgradeName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.hand {
+  /* Main hand section */
+}
+
+.cards {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-height: 100px;
+}

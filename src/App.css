@@ -1,0 +1,28 @@
+.game-layout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.main-area {
+  min-width: 0;
+}
+
+.sidebar {
+  position: sticky;
+  top: 1.5rem;
+  height: fit-content;
+}
+
+@media (max-width: 1200px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+}
