@@ -18,7 +18,6 @@ export function FloatingHand({
 }) {
   if (!isCurrentPlayer) return null;
 
-  const [showMarket, setShowMarket] = useState(false);
   const [marketDrawRevealed, setMarketDrawRevealed] = useState(false);
 
   // Calculate patience tokens
@@ -34,31 +33,21 @@ export function FloatingHand({
 
   const handleBuyUpgrade = (upgrade) => {
     onBuyUpgrade(upgrade);
-    setShowMarket(false);
     setMarketDrawRevealed(false);
   };
 
   const handleSelectMarketCard = (card) => {
     // Player selected one of the revealed market cards
     setMarketDrawRevealed(false);
-    setShowMarket(false);
-  };
-
-  const handleOpenMarket = () => {
-    if (turnPhase === 'buy') {
-      setShowMarket(true);
-      setMarketDrawRevealed(false);
-    }
   };
 
   const handleSkipMarket = () => {
-    setShowMarket(false);
     setMarketDrawRevealed(false);
     onSkipPhase(); // Skip buy phase
   };
 
-  // MARKET VIEW (Buy Phase)
-  if (showMarket && turnPhase === 'buy') {
+  // MARKET VIEW (Buy Phase) - ONLY show market, no hand
+  if (turnPhase === 'buy') {
     return (
       <div className={styles.container}>
         <div className={styles.handPanel}>
@@ -97,10 +86,12 @@ export function FloatingHand({
               {!marketDrawRevealed ? (
                 <>
                   <div
-                    className={styles.marketBackWrapper}
+                    className={styles.cardWrapper}
                     onClick={handleMarketDrawClick}
                   >
-                    <CardBack type="market" />
+                    <div className={styles.marketBackCard}>
+                      <img src="/assets/cards/MarketBack.png" alt="Market Deck" />
+                    </div>
                   </div>
                   <button className={styles.skipButton} onClick={handleSkipMarket}>
                     SKIP
@@ -185,17 +176,6 @@ export function FloatingHand({
         {/* Middle - Turn Actions */}
         <div className={styles.actionsSection}>
           <h3 className={styles.sectionTitle}>ACTIONS</h3>
-
-          {turnPhase === 'buy' && (
-            <>
-              <button className={styles.actionButton} onClick={handleOpenMarket}>
-                OPEN MARKET
-              </button>
-              <button className={styles.secondaryButton} onClick={onSkipPhase}>
-                SKIP BUY
-              </button>
-            </>
-          )}
 
           {turnPhase === 'play' && (
             <>

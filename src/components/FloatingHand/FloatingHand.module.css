@@ -217,12 +217,26 @@
   align-items: flex-end;
 }
 
-.marketBackWrapper {
+.marketBackCard {
+  width: 120px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  cursor: pointer;
   transition: transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid #1a1a1a;
 }
 
-.marketBackWrapper:hover {
+.marketBackCard:hover {
   transform: translateY(-8px);
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.5);
+  border-color: #FFD700;
+}
+
+.marketBackCard img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .skipButton {
