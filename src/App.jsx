@@ -3,9 +3,7 @@ import { GameProvider, useGame } from './context/GameContext';
 import { StartScreen } from './components/StartScreen/StartScreen';
 import { GameBoard } from './components/GameBoard/GameBoard';
 import { GameStatus } from './components/GameStatus/GameStatus';
-import { TurnActions } from './components/TurnActions/TurnActions';
 import { FloatingHand } from './components/FloatingHand/FloatingHand';
-import { MarketOverlay } from './components/MarketOverlay/MarketOverlay';
 import { initializeGame } from './utils/gameSetup';
 import { getSection } from './data/cards';
 import { drawCards } from './utils/deckManager';
@@ -14,7 +12,7 @@ import './App.css';
 function GameContent() {
   const { state, dispatch } = useGame();
   const [selectedCards, setSelectedCards] = useState([]);
-  const [isMarketOpen, setIsMarketOpen] = useState(false);
+  const [marketDrawCards, setMarketDrawCards] = useState([]);
 
   const handleStartGame = (playerNames) => {
     const gameState = initializeGame(playerNames);
@@ -278,7 +276,6 @@ function GameContent() {
     });
 
     addLog(`${currentPlayer.name} bought ${upgrade.name} for ${upgrade.cost} patience`);
-    setIsMarketOpen(false);
   };
 
   const handleDrawMarket = () => {
@@ -289,32 +286,25 @@ function GameContent() {
       return;
     }
 
-    const result = drawCards(state.marketDrawPile, state.marketDiscardPile, 1);
+    // Draw 2 cards from market deck
+    const result = drawCards(state.marketDrawPile, state.marketDiscardPile, 2);
     if (result.drawnCards.length === 0) {
       addLog('Market deck is empty!');
       return;
     }
 
-    const newPlayers = [...state.players];
-    newPlayers[state.currentPlayerIndex] = {
-      ...currentPlayer,
-      patience: currentPlayer.patience - 1,
-      hand: [...currentPlayer.hand, result.drawnCards[0]],
-    };
+    // Store the 2 cards to display
+    setMarketDrawCards(result.drawnCards);
 
+    // Don't add to hand yet - player will choose one
     dispatch({
       type: 'INITIALIZE_GAME',
       payload: {
         ...state,
-        players: newPlayers,
         marketDrawPile: result.newDrawPile,
         marketDiscardPile: result.newDiscardPile,
-        turnPhase: 'play',
       },
     });
-
-    addLog(`${currentPlayer.name} drew ${result.drawnCards[0].name} from market for 1 patience`);
-    setIsMarketOpen(false);
   };
 
   const addLog = (message) => {
@@ -341,30 +331,19 @@ function GameContent() {
 
       <GameBoard players={state.players} />
 
-      <TurnActions
-        turnPhase={state.turnPhase}
-        selectedCards={selectedCards}
-        currentPlayer={currentPlayer}
-        onPlayCards={handlePlayCards}
-        onSkipPhase={handleSkipPhase}
-        onEndTurn={handleEndTurn}
-      />
-
       <FloatingHand
         player={currentPlayer}
         selectedCards={selectedCards}
         onCardClick={handleCardClick}
-        onMarketClick={() => setIsMarketOpen(true)}
         isCurrentPlayer={true}
-      />
-
-      <MarketOverlay
-        isOpen={isMarketOpen}
-        onClose={() => setIsMarketOpen(false)}
+        turnPhase={state.turnPhase}
         upgradeCards={state.upgradeCards}
         onBuyUpgrade={handleBuyUpgrade}
         onDrawMarket={handleDrawMarket}
-        currentPlayer={currentPlayer}
+        onPlayCards={handlePlayCards}
+        onSkipPhase={handleSkipPhase}
+        onEndTurn={handleEndTurn}
+        marketDrawCards={marketDrawCards}
       />
     </div>
   );

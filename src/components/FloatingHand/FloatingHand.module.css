@@ -25,6 +25,7 @@
   max-width: 95vw;
 }
 
+/* PLAYER HAND SECTIONS */
 .handSection {
   display: flex;
   flex-direction: column;
@@ -36,6 +37,14 @@
   flex-direction: column;
   gap: 1rem;
   min-width: 200px;
+}
+
+.actionsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 180px;
+  justify-content: center;
 }
 
 .sectionTitle {
@@ -55,6 +64,7 @@
 
 .cardWrapper {
   transition: transform 0.2s;
+  cursor: pointer;
 }
 
 .cardWrapper:hover {
@@ -69,6 +79,7 @@
   background: rgba(255, 215, 0, 0.05);
 }
 
+/* PATIENCE TOKENS */
 .tokensDisplay {
   display: flex;
   flex-direction: column;
@@ -122,10 +133,8 @@
   letter-spacing: 1px;
 }
 
-.marketButton {
-  position: absolute;
-  bottom: 1.5rem;
-  right: 2rem;
+/* ACTION BUTTONS */
+.actionButton {
   padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
   color: #000000;
@@ -140,22 +149,119 @@
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
 }
 
-.marketButton:hover {
+.actionButton:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255, 215, 0, 0.8);
 }
 
-.marketButton:active {
+.actionButton:active:not(:disabled) {
   transform: translateY(0);
 }
 
+.actionButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  padding: 0.65rem 1.25rem;
+  background: transparent;
+  color: #FFD700;
+  border: 2px solid #FFD700;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.secondaryButton:hover {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: #FFC107;
+}
+
+/* MARKET VIEW */
+.marketSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.upgradesRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.upgradeWrapper {
+  transition: transform 0.2s, opacity 0.3s;
+}
+
+.upgradeWrapper:hover {
+  transform: translateY(-8px);
+}
+
+.marketDrawSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 400px;
+}
+
+.marketDrawRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.marketBackWrapper {
+  transition: transform 0.2s;
+}
+
+.marketBackWrapper:hover {
+  transform: translateY(-8px);
+}
+
+.skipButton {
+  width: 120px;
+  height: 170px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skipButton:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.8);
+}
+
+.skipButton:active {
+  transform: translateY(0);
+}
+
+/* RESPONSIVE */
 @media (max-width: 1400px) {
   .handPanel {
     gap: 2rem;
     padding: 1.25rem 1.5rem;
   }
 
-  .cardsRow {
+  .cardsRow,
+  .upgradesRow {
     gap: 0.5rem;
   }
 }
@@ -166,7 +272,13 @@
     gap: 1.5rem;
   }
 
-  .marketButton {
+  .actionsSection {
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .closeMarketButton {
     position: static;
     align-self: center;
     margin-top: 1rem;
@@ -178,7 +290,8 @@
     padding: 1rem;
   }
 
-  .cardsRow {
+  .cardsRow,
+  .upgradesRow {
     gap: 0.35rem;
   }
 
@@ -196,5 +309,11 @@
     width: 32px;
     height: 32px;
     font-size: 1rem;
+  }
+
+  .actionButton,
+  .secondaryButton {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
   }
 }

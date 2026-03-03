@@ -1,19 +1,163 @@
-import { Card } from '../Card/Card';
+import { useState } from 'react';
+import { Card, CardBack } from '../Card/Card';
 import styles from './FloatingHand.module.css';
 
 export function FloatingHand({
   player,
   selectedCards,
   onCardClick,
-  onMarketClick,
-  isCurrentPlayer
+  isCurrentPlayer,
+  turnPhase,
+  upgradeCards,
+  onBuyUpgrade,
+  onDrawMarket,
+  onPlayCards,
+  onSkipPhase,
+  onEndTurn,
+  marketDrawCards = []
 }) {
   if (!isCurrentPlayer) return null;
+
+  const [showMarket, setShowMarket] = useState(false);
+  const [marketDrawRevealed, setMarketDrawRevealed] = useState(false);
 
   // Calculate patience tokens
   const threeTokens = Math.floor(player.patience / 3);
   const oneTokens = player.patience % 3;
 
+  const handleMarketDrawClick = () => {
+    if (!marketDrawRevealed && player.patience >= 1) {
+      setMarketDrawRevealed(true);
+      onDrawMarket();
+    }
+  };
+
+  const handleBuyUpgrade = (upgrade) => {
+    onBuyUpgrade(upgrade);
+    setShowMarket(false);
+    setMarketDrawRevealed(false);
+  };
+
+  const handleSelectMarketCard = (card) => {
+    // Player selected one of the revealed market cards
+    setMarketDrawRevealed(false);
+    setShowMarket(false);
+  };
+
+  const handleOpenMarket = () => {
+    if (turnPhase === 'buy') {
+      setShowMarket(true);
+      setMarketDrawRevealed(false);
+    }
+  };
+
+  const handleSkipMarket = () => {
+    setShowMarket(false);
+    setMarketDrawRevealed(false);
+    onSkipPhase(); // Skip buy phase
+  };
+
+  // MARKET VIEW (Buy Phase)
+  if (showMarket && turnPhase === 'buy') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.handPanel}>
+          {/* Left side - Upgrades */}
+          <div className={styles.marketSection}>
+            <h3 className={styles.sectionTitle}>Upgrades</h3>
+            <div className={styles.upgradesRow}>
+              {upgradeCards.map((upgrade) => {
+                const owned = player.upgrades.some(u => u.id === upgrade.id);
+                const canAfford = player.patience >= upgrade.cost;
+                const canBuy = !owned && canAfford;
+
+                return (
+                  <div
+                    key={upgrade.id}
+                    className={styles.upgradeWrapper}
+                    style={{ opacity: canBuy ? 1 : 0.3 }}
+                  >
+                    <Card
+                      card={upgrade}
+                      onClick={() => canBuy && handleBuyUpgrade(upgrade)}
+                      isDisabled={!canBuy}
+                      size="normal"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Middle - Market Draw */}
+          <div className={styles.marketDrawSection}>
+            <h3 className={styles.sectionTitle}>MARKET DRAW</h3>
+            <div className={styles.marketDrawRow}>
+              {/* Market Back Card or Skip Button */}
+              {!marketDrawRevealed ? (
+                <>
+                  <div
+                    className={styles.marketBackWrapper}
+                    onClick={handleMarketDrawClick}
+                  >
+                    <CardBack type="market" />
+                  </div>
+                  <button className={styles.skipButton} onClick={handleSkipMarket}>
+                    SKIP
+                  </button>
+                </>
+              ) : (
+                /* Revealed cards */
+                marketDrawCards.map((card, index) => (
+                  <div
+                    key={`market-${index}`}
+                    className={styles.cardWrapper}
+                    onClick={() => handleSelectMarketCard(card)}
+                  >
+                    <Card
+                      card={card}
+                      size="normal"
+                    />
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Right side - Patience display */}
+          <div className={styles.patienceSection}>
+            <h3 className={styles.sectionTitle}>PATIENCE</h3>
+
+            <div className={styles.tokensDisplay}>
+              {/* Top row - 3 tokens */}
+              <div className={styles.tokenRow}>
+                {Array(threeTokens).fill(null).map((_, index) => (
+                  <div key={`three-${index}`} className={styles.token3}>
+                    3
+                  </div>
+                ))}
+              </div>
+
+              {/* Bottom row - 1 tokens */}
+              <div className={styles.tokenRow}>
+                {Array(oneTokens).fill(null).map((_, index) => (
+                  <div key={`one-${index}`} className={styles.token1}>
+                    1
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.totalPatience}>
+              TOTAL: {player.patience}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // PLAYER HAND VIEW (Play, Discard, Draw phases)
   return (
     <div className={styles.container}>
       <div className={styles.handPanel}>
@@ -36,6 +180,58 @@ export function FloatingHand({
               <div key={`empty-${index}`} className={styles.emptySlot} />
             ))}
           </div>
+        </div>
+
+        {/* Middle - Turn Actions */}
+        <div className={styles.actionsSection}>
+          <h3 className={styles.sectionTitle}>ACTIONS</h3>
+
+          {turnPhase === 'buy' && (
+            <>
+              <button className={styles.actionButton} onClick={handleOpenMarket}>
+                OPEN MARKET
+              </button>
+              <button className={styles.secondaryButton} onClick={onSkipPhase}>
+                SKIP BUY
+              </button>
+            </>
+          )}
+
+          {turnPhase === 'play' && (
+            <>
+              <button
+                className={styles.actionButton}
+                onClick={onPlayCards}
+                disabled={selectedCards.length === 0}
+              >
+                PLAY {selectedCards.length} CARD{selectedCards.length !== 1 ? 'S' : ''}
+              </button>
+              <button className={styles.secondaryButton} onClick={onSkipPhase}>
+                SKIP PLAY
+              </button>
+            </>
+          )}
+
+          {turnPhase === 'discard' && (
+            <>
+              <button
+                className={styles.actionButton}
+                onClick={onPlayCards}
+                disabled={selectedCards.length === 0 || selectedCards.length > 2}
+              >
+                DISCARD {selectedCards.length}
+              </button>
+              <button className={styles.secondaryButton} onClick={onSkipPhase}>
+                SKIP DISCARD
+              </button>
+            </>
+          )}
+
+          {turnPhase === 'draw' && (
+            <button className={styles.actionButton} onClick={onEndTurn}>
+              END TURN
+            </button>
+          )}
         </div>
 
         {/* Right side - PATIENCE */}
@@ -66,11 +262,6 @@ export function FloatingHand({
             TOTAL: {player.patience}
           </div>
         </div>
-
-        {/* Market button */}
-        <button className={styles.marketButton} onClick={onMarketClick}>
-          MARKET
-        </button>
       </div>
     </div>
   );
