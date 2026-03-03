@@ -1,4 +1,5 @@
 import { Card } from '../Card/Card';
+import { PatienceTokens } from '../PatienceTokens/PatienceTokens';
 import styles from './FloatingHand.module.css';
 
 export function FloatingHand({
@@ -13,37 +14,45 @@ export function FloatingHand({
   return (
     <div className={styles.container}>
       <div className={styles.handWrapper}>
+        {/* Hand.png background */}
         <img
           src="/assets/cards/Hand.png"
           alt="Player Hand"
           className={styles.handBackground}
         />
 
+        {/* Overlaid content */}
         <div className={styles.handContent}>
-          <div className={styles.playerInfo}>
-            <span className={styles.playerName}>{player.name}</span>
-            <div className={styles.stats}>
-              <span className={styles.stat}>
-                Tile: <strong>{player.position}</strong>/36
-              </span>
-              <span className={`${styles.stat} ${player.patience <= 2 ? styles.lowPatience : ''}`}>
-                Patience: <strong>{player.patience}</strong>
-              </span>
-            </div>
-          </div>
+          {/* Player name at top */}
+          <div className={styles.playerName}>{player.name}</div>
 
-          <div className={styles.cards}>
+          {/* Actual cards overlaying the mock cards in hand.png */}
+          <div className={styles.cardsArea}>
             {player.hand.map((card, index) => (
-              <Card
+              <div
                 key={`${card.id}-${index}`}
-                card={card}
-                onClick={onCardClick}
-                isSelected={selectedCards.some(sc => sc.id === card.id)}
-                size="normal"
-              />
+                className={styles.cardSlot}
+                style={{
+                  '--card-index': index,
+                  '--total-cards': player.hand.length
+                }}
+              >
+                <Card
+                  card={card}
+                  onClick={onCardClick}
+                  isSelected={selectedCards.some(sc => sc.id === card.id)}
+                  size="normal"
+                />
+              </div>
             ))}
           </div>
 
+          {/* Patience tokens positioned where tokens appear in hand.png */}
+          <div className={styles.tokensArea}>
+            <PatienceTokens totalPatience={player.patience} />
+          </div>
+
+          {/* Market button */}
           <button className={styles.marketButton} onClick={onMarketClick}>
             <span className={styles.marketIcon}>🛒</span>
             Market

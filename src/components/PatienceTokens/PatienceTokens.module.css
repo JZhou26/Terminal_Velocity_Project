@@ -1,0 +1,42 @@
+.container {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.token {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #1a1a1a;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.token:hover {
+  transform: scale(1.1);
+}
+
+.threeToken {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+}
+
+.oneToken {
+  background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%);
+}
+
+.tokenValue {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #1a1a1a;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  user-select: none;
+  -webkit-user-select: none;
+}

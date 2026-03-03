@@ -4,18 +4,23 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  max-width: 90vw;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .handWrapper {
   position: relative;
   display: inline-block;
+  pointer-events: auto;
 }
 
 .handBackground {
-  width: 100%;
-  max-width: 1000px;
+  width: auto;
+  max-width: 90vw;
   height: auto;
+  max-height: 300px;
   display: block;
   filter: drop-shadow(0 -4px 20px rgba(255, 215, 0, 0.4));
 }
@@ -28,66 +33,58 @@
   bottom: 0;
   display: flex;
   flex-direction: column;
-  padding: 1rem 2rem;
-  gap: 0.5rem;
-}
-
-.playerInfo {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  justify-content: flex-start;
+  padding: 1rem;
 }
 
 .playerName {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 1.2rem;
   font-weight: 900;
   color: #FFD700;
   text-transform: uppercase;
   letter-spacing: 2px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow:
+    2px 2px 4px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(255, 215, 0, 0.5);
+  z-index: 10;
 }
 
-.stats {
+.cardsArea {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  gap: 1rem;
-}
-
-.stat {
-  color: #FFD700;
-  font-weight: 700;
-  font-size: 0.9rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-}
-
-.stat strong {
-  font-weight: 900;
-  font-size: 1.1rem;
-}
-
-.lowPatience {
-  color: #ff4444;
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-.cards {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
+  gap: 0.5rem;
   align-items: flex-end;
-  flex: 1;
-  padding-bottom: 1rem;
+  justify-content: center;
+  padding: 0 2rem;
+}
+
+.cardSlot {
+  transition: transform 0.3s;
+}
+
+.cardSlot:hover {
+  transform: translateY(-10px);
+}
+
+.tokensArea {
+  position: absolute;
+  bottom: 8%;
+  left: 15%;
+  transform: translateY(-50%);
 }
 
 .marketButton {
   position: absolute;
-  right: 1.5rem;
-  bottom: 1.5rem;
+  right: 8%;
+  bottom: 8%;
   padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
   color: #1a1a1a;
@@ -119,18 +116,54 @@
 }
 
 @media (max-width: 1200px) {
-  .handContent {
-    padding: 0.5rem 1rem;
+  .handBackground {
+    max-height: 250px;
   }
 
-  .cards {
-    gap: 0.5rem;
+  .cardsArea {
+    gap: 0.35rem;
+    padding: 0 1rem;
+  }
+
+  .playerName {
+    font-size: 1rem;
   }
 
   .marketButton {
-    right: 1rem;
-    bottom: 1rem;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.2rem;
     font-size: 0.875rem;
+  }
+
+  .tokensArea {
+    left: 12%;
+    bottom: 10%;
+  }
+}
+
+@media (max-width: 768px) {
+  .handBackground {
+    max-height: 200px;
+  }
+
+  .cardsArea {
+    gap: 0.25rem;
+    padding: 0 0.5rem;
+    bottom: 25%;
+  }
+
+  .playerName {
+    font-size: 0.875rem;
+  }
+
+  .marketButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    right: 5%;
+    bottom: 5%;
+  }
+
+  .tokensArea {
+    left: 8%;
+    bottom: 12%;
   }
 }
