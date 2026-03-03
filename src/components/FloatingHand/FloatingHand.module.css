@@ -239,32 +239,62 @@
   display: block;
 }
 
-.skipButton {
-  width: 120px;
-  height: 170px;
+.marketButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.marketActionButton {
+  padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
   color: #000000;
   border: 3px solid #000000;
   border-radius: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 900;
   cursor: pointer;
   transition: all 0.3s;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  white-space: nowrap;
+  min-width: 140px;
 }
 
-.skipButton:hover {
-  transform: translateY(-8px);
+.marketActionButton:hover {
+  transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255, 215, 0, 0.8);
 }
 
-.skipButton:active {
+.marketActionButton:active {
   transform: translateY(0);
+}
+
+.handPreview {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #FFD700;
+}
+
+.previewTitle {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #FFD700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 900;
+}
+
+.previewCards {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.previewCard {
+  opacity: 0.8;
 }
 
 /* RESPONSIVE */

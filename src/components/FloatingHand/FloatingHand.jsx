@@ -19,6 +19,7 @@ export function FloatingHand({
   if (!isCurrentPlayer) return null;
 
   const [marketDrawRevealed, setMarketDrawRevealed] = useState(false);
+  const [showHandInMarket, setShowHandInMarket] = useState(false);
 
   // Calculate patience tokens
   const threeTokens = Math.floor(player.patience / 3);
@@ -46,7 +47,7 @@ export function FloatingHand({
     onSkipPhase(); // Skip buy phase
   };
 
-  // MARKET VIEW (Buy Phase) - ONLY show market, no hand
+  // MARKET VIEW (Buy Phase)
   if (turnPhase === 'buy') {
     return (
       <div className={styles.container}>
@@ -82,7 +83,7 @@ export function FloatingHand({
           <div className={styles.marketDrawSection}>
             <h3 className={styles.sectionTitle}>MARKET DRAW</h3>
             <div className={styles.marketDrawRow}>
-              {/* Market Back Card or Skip Button */}
+              {/* Market Back Card */}
               {!marketDrawRevealed ? (
                 <>
                   <div
@@ -93,9 +94,17 @@ export function FloatingHand({
                       <img src="/assets/cards/MarketBack.png" alt="Market Deck" />
                     </div>
                   </div>
-                  <button className={styles.skipButton} onClick={handleSkipMarket}>
-                    SKIP
-                  </button>
+                  <div className={styles.marketButtons}>
+                    <button className={styles.marketActionButton} onClick={handleSkipMarket}>
+                      SKIP
+                    </button>
+                    <button
+                      className={styles.marketActionButton}
+                      onClick={() => setShowHandInMarket(!showHandInMarket)}
+                    >
+                      {showHandInMarket ? 'HIDE HAND' : 'SHOW HAND'}
+                    </button>
+                  </div>
                 </>
               ) : (
                 /* Revealed cards */
@@ -113,6 +122,20 @@ export function FloatingHand({
                 ))
               )}
             </div>
+
+            {/* Show hand if requested */}
+            {showHandInMarket && (
+              <div className={styles.handPreview}>
+                <h4 className={styles.previewTitle}>Your Hand</h4>
+                <div className={styles.previewCards}>
+                  {player.hand.map((card, index) => (
+                    <div key={`preview-${card.id}-${index}`} className={styles.previewCard}>
+                      <Card card={card} size="small" isDisabled={true} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right side - Patience display */}
