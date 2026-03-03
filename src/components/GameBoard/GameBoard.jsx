@@ -1,6 +1,11 @@
 import styles from './GameBoard.module.css';
 
-const PLAYER_COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3'];
+const PLAYER_PLANES = [
+  '/assets/cards/Plane1.png',
+  '/assets/cards/Plane2.png',
+  '/assets/cards/Plane3.png',
+  '/assets/cards/Plane4.png',
+];
 
 export function GameBoard({ players }) {
   return (
@@ -22,20 +27,17 @@ export function GameBoard({ players }) {
             const { top, left } = getTilePosition(position, index);
 
             return (
-              <div
+              <img
                 key={player.id}
+                src={PLAYER_PLANES[index]}
+                alt={`${player.name} - Tile ${position}`}
                 className={styles.playerToken}
                 style={{
                   top: `${top}%`,
                   left: `${left}%`,
-                  backgroundColor: PLAYER_COLORS[index],
                 }}
                 title={`${player.name} - Tile ${position}`}
-              >
-                <span className={styles.tokenText}>
-                  {player.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
+              />
             );
           })}
         </div>
@@ -44,9 +46,10 @@ export function GameBoard({ players }) {
       <div className={styles.legend}>
         {players.map((player, index) => (
           <div key={player.id} className={styles.legendItem}>
-            <div
-              className={styles.legendColor}
-              style={{ backgroundColor: PLAYER_COLORS[index] }}
+            <img
+              src={PLAYER_PLANES[index]}
+              alt={player.name}
+              className={styles.legendPlane}
             />
             <span className={player.isEliminated ? styles.eliminated : ''}>
               {player.name} - Tile {player.position}

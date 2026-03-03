@@ -1,0 +1,136 @@
+.container {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  max-width: 90vw;
+}
+
+.handWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.handBackground {
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 -4px 20px rgba(255, 215, 0, 0.4));
+}
+
+.handContent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 2rem;
+  gap: 0.5rem;
+}
+
+.playerInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.playerName {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #FFD700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat {
+  color: #FFD700;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.stat strong {
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+.lowPatience {
+  color: #ff4444;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.cards {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: flex-end;
+  flex: 1;
+  padding-bottom: 1rem;
+}
+
+.marketButton {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+  color: #1a1a1a;
+  border: 3px solid #1a1a1a;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.marketButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.8);
+}
+
+.marketButton:active {
+  transform: translateY(0);
+}
+
+.marketIcon {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 1200px) {
+  .handContent {
+    padding: 0.5rem 1rem;
+  }
+
+  .cards {
+    gap: 0.5rem;
+  }
+
+  .marketButton {
+    right: 1rem;
+    bottom: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}

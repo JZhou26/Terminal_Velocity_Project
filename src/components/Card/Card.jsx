@@ -23,7 +23,6 @@ export function Card({ card, onClick, isSelected, isDisabled, size = 'normal' })
         alt={card.name}
         className={styles.cardImage}
       />
-      <div className={styles.cardName}>{card.name}</div>
     </div>
   );
 }

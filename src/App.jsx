@@ -3,9 +3,9 @@ import { GameProvider, useGame } from './context/GameContext';
 import { StartScreen } from './components/StartScreen/StartScreen';
 import { GameBoard } from './components/GameBoard/GameBoard';
 import { GameStatus } from './components/GameStatus/GameStatus';
-import { PlayerArea } from './components/PlayerArea/PlayerArea';
-import { Market } from './components/Market/Market';
 import { TurnActions } from './components/TurnActions/TurnActions';
+import { FloatingHand } from './components/FloatingHand/FloatingHand';
+import { MarketOverlay } from './components/MarketOverlay/MarketOverlay';
 import { initializeGame } from './utils/gameSetup';
 import { getSection } from './data/cards';
 import { drawCards } from './utils/deckManager';
@@ -14,6 +14,7 @@ import './App.css';
 function GameContent() {
   const { state, dispatch } = useGame();
   const [selectedCards, setSelectedCards] = useState([]);
+  const [isMarketOpen, setIsMarketOpen] = useState(false);
 
   const handleStartGame = (playerNames) => {
     const gameState = initializeGame(playerNames);
@@ -277,6 +278,7 @@ function GameContent() {
     });
 
     addLog(`${currentPlayer.name} bought ${upgrade.name} for ${upgrade.cost} patience`);
+    setIsMarketOpen(false);
   };
 
   const handleDrawMarket = () => {
@@ -312,6 +314,7 @@ function GameContent() {
     });
 
     addLog(`${currentPlayer.name} drew ${result.drawnCards[0].name} from market for 1 patience`);
+    setIsMarketOpen(false);
   };
 
   const addLog = (message) => {
@@ -328,45 +331,41 @@ function GameContent() {
   const currentPlayer = state.players[state.currentPlayerIndex];
 
   return (
-    <div className="game-layout">
-      <div className="main-area">
-        <GameStatus
-          currentRound={state.currentRound}
-          currentPlayer={currentPlayer.name}
-          turnPhase={state.turnPhase}
-          gameLog={state.gameLog}
-        />
+    <div className="game-container">
+      <GameStatus
+        currentRound={state.currentRound}
+        currentPlayer={currentPlayer.name}
+        turnPhase={state.turnPhase}
+        gameLog={state.gameLog}
+      />
 
-        <GameBoard players={state.players} />
+      <GameBoard players={state.players} />
 
-        <TurnActions
-          turnPhase={state.turnPhase}
-          selectedCards={selectedCards}
-          currentPlayer={currentPlayer}
-          onPlayCards={handlePlayCards}
-          onSkipPhase={handleSkipPhase}
-          onEndTurn={handleEndTurn}
-        />
+      <TurnActions
+        turnPhase={state.turnPhase}
+        selectedCards={selectedCards}
+        currentPlayer={currentPlayer}
+        onPlayCards={handlePlayCards}
+        onSkipPhase={handleSkipPhase}
+        onEndTurn={handleEndTurn}
+      />
 
-        {state.players.map(player => (
-          <PlayerArea
-            key={player.id}
-            player={player}
-            isCurrentPlayer={player.id === currentPlayer.id}
-            onCardClick={handleCardClick}
-            selectedCards={selectedCards}
-          />
-        ))}
-      </div>
+      <FloatingHand
+        player={currentPlayer}
+        selectedCards={selectedCards}
+        onCardClick={handleCardClick}
+        onMarketClick={() => setIsMarketOpen(true)}
+        isCurrentPlayer={true}
+      />
 
-      <div className="sidebar">
-        <Market
-          upgradeCards={state.upgradeCards}
-          onBuyUpgrade={handleBuyUpgrade}
-          onDrawMarket={handleDrawMarket}
-          currentPlayer={currentPlayer}
-        />
-      </div>
+      <MarketOverlay
+        isOpen={isMarketOpen}
+        onClose={() => setIsMarketOpen(false)}
+        upgradeCards={state.upgradeCards}
+        onBuyUpgrade={handleBuyUpgrade}
+        onDrawMarket={handleDrawMarket}
+        currentPlayer={currentPlayer}
+      />
     </div>
   );
 }

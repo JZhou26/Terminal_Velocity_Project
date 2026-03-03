@@ -1,29 +1,27 @@
-.game-layout {
-  display: grid;
-  grid-template-columns: 1fr 350px;
-  gap: 1.5rem;
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 1.5rem;
-  max-width: 1600px;
-  margin: 0 auto;
   min-height: 100vh;
+  padding-bottom: 300px; /* Space for floating hand */
 }
 
-.main-area {
-  min-width: 0;
-}
-
-.sidebar {
-  position: sticky;
-  top: 1.5rem;
-  height: fit-content;
+.game-container > * {
+  max-width: 1200px;
+  width: 100%;
 }
 
 @media (max-width: 1200px) {
-  .game-layout {
-    grid-template-columns: 1fr;
+  .game-container {
+    padding: 1rem;
+    padding-bottom: 250px;
   }
+}
 
-  .sidebar {
-    position: static;
+@media (max-width: 768px) {
+  .game-container {
+    padding: 0.5rem;
+    padding-bottom: 200px;
   }
 }
