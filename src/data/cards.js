@@ -191,7 +191,7 @@ export const upgradeCards = [
     section: 'all',
     imagePath: '/assets/cards/ExpertTraveler.png',
     description: 'Remove section restrictions on movement cards',
-    cost: 3,
+    cost: 4,
     isPermanent: true,
   },
   {
@@ -202,7 +202,7 @@ export const upgradeCards = [
     section: 'all',
     imagePath: '/assets/cards/SeasonedTraveler.png',
     description: 'Casual Traveler moves 3 spaces instead of 2',
-    cost: 2,
+    cost: 4,
     isPermanent: true,
   },
   {
@@ -213,7 +213,7 @@ export const upgradeCards = [
     section: 'drive',
     imagePath: '/assets/cards/EmergencyBrake.png',
     description: 'Immune to Events while in Drive section',
-    cost: 2,
+    cost: 4,
     isPermanent: true,
   },
   {
@@ -224,7 +224,7 @@ export const upgradeCards = [
     section: 'security',
     imagePath: '/assets/cards/TSAPrecheck.png',
     description: 'Immune to Events while in Security section',
-    cost: 2,
+    cost: 4,
     isPermanent: true,
   },
   {
@@ -235,7 +235,7 @@ export const upgradeCards = [
     section: 'airplane',
     imagePath: '/assets/cards/CapitainsFriend.png',
     description: 'Annoyance cards only cost 1 patience',
-    cost: 3,
+    cost: 4,
     isPermanent: true,
   },
 ];
