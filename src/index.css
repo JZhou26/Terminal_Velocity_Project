@@ -14,7 +14,7 @@
 
 body {
   margin: 0;
-  font-family: 'Impact', 'Arial Black', 'Franklin Gothic Medium', sans-serif;
+  font-family: 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg, var(--primary-black) 0%, var(--secondary-black) 100%);
