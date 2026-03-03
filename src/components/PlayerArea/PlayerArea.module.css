@@ -1,15 +1,18 @@
 .container {
-  background: white;
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  border: 3px solid #666;
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s, transform 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s;
 }
 
 .container.active {
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
-  border: 2px solid #667eea;
+  border-color: #FFD700;
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.5),
+    0 4px 20px rgba(0, 0, 0, 0.3);
   transform: scale(1.01);
 }
 
@@ -25,19 +28,26 @@
 .playerName {
   margin: 0;
   font-size: 1.5rem;
-  color: #333;
+  color: #FFD700;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .badge {
-  background: #667eea;
-  color: white;
+  background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+  color: #1a1a1a;
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
 }
 
 .stats {
@@ -53,19 +63,27 @@
 
 .statLabel {
   font-size: 0.75rem;
-  color: #666;
+  color: #FFC107;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  font-weight: 700;
 }
 
 .statValue {
   font-size: 1.25rem;
-  font-weight: bold;
-  color: #333;
+  font-weight: 900;
+  color: #FFD700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .lowPatience {
-  color: #e74c3c;
+  color: #ff4444;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 .upgrades {
@@ -75,8 +93,10 @@
 .sectionTitle {
   font-size: 1rem;
   margin: 0 0 0.75rem 0;
-  color: #555;
-  font-weight: 600;
+  color: #FFD700;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .upgradeList {
@@ -89,10 +109,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f0f0f0;
+  background: #1a1a1a;
   padding: 0.5rem;
   border-radius: 0.5rem;
-  border: 1px solid #ddd;
+  border: 2px solid #FFD700;
 }
 
 .upgradeImage {
@@ -103,8 +123,9 @@
 
 .upgradeName {
   font-size: 0.875rem;
-  font-weight: 500;
-  color: #333;
+  font-weight: 700;
+  color: #FFD700;
+  text-transform: uppercase;
 }
 
 .hand {

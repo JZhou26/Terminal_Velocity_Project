@@ -3,32 +3,68 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 215, 0, 0.03) 10px,
+      rgba(255, 215, 0, 0.03) 20px
+    );
+  pointer-events: none;
 }
 
 .content {
-  background: white;
+  background: #2d2d2d;
+  border: 4px solid #FFD700;
   border-radius: 1rem;
   padding: 3rem;
   max-width: 600px;
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.3),
+    0 20px 60px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 1;
 }
 
 .title {
-  font-size: 3rem;
-  font-weight: bold;
+  font-size: 3.5rem;
+  font-weight: 900;
   text-align: center;
   margin: 0 0 0.5rem 0;
-  color: #667eea;
+  color: #FFD700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow:
+    3px 3px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    4px 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .subtitle {
   text-align: center;
-  color: #666;
+  color: #FFD700;
   margin: 0 0 2rem 0;
   font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
 .form {
@@ -38,7 +74,10 @@
 .form h2 {
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
-  color: #333;
+  color: #FFD700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 900;
 }
 
 .inputGroup {
@@ -48,52 +87,76 @@
 }
 
 .inputGroup label {
-  width: 100px;
-  font-weight: 500;
-  color: #555;
+  width: 120px;
+  font-weight: 700;
+  color: #FFD700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .input {
   flex: 1;
   padding: 0.75rem;
-  border: 2px solid #ddd;
+  border: 3px solid #FFD700;
+  background: #1a1a1a;
+  color: #FFD700;
   border-radius: 0.5rem;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+
+.input::placeholder {
+  color: #888;
 }
 
 .input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #FFC107;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+  background: #2d2d2d;
 }
 
 .startButton {
   width: 100%;
-  padding: 1rem;
+  padding: 1.2rem;
   margin-top: 1.5rem;
-  background: #667eea;
-  color: white;
+  background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+  color: #1a1a1a;
   border: none;
   border-radius: 0.5rem;
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 1.4rem;
+  font-weight: 900;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
 }
 
 .startButton:hover {
-  background: #5568d3;
+  background: linear-gradient(135deg, #FFC107 0%, #FFD700 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+}
+
+.startButton:active {
+  transform: translateY(0);
 }
 
 .rules {
-  background: #f7f7f7;
+  background: #1a1a1a;
   padding: 1.5rem;
   border-radius: 0.5rem;
+  border: 2px solid #FFD700;
 }
 
 .rules h3 {
   margin-top: 0;
-  color: #333;
+  color: #FFD700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 900;
 }
 
 .rules ul {
@@ -103,5 +166,6 @@
 
 .rules li {
   margin-bottom: 0.5rem;
-  color: #666;
+  color: #FFC107;
+  font-weight: 600;
 }

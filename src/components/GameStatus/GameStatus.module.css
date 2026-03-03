@@ -1,9 +1,10 @@
 .container {
-  background: white;
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  border: 3px solid #FFD700;
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
 }
 
 .statusBar {
@@ -22,33 +23,37 @@
 
 .label {
   font-size: 0.75rem;
-  color: #666;
+  color: #FFC107;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   margin-bottom: 0.25rem;
+  font-weight: 700;
 }
 
 .value {
   font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
+  font-weight: 900;
+  color: #FFD700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .phase {
-  color: #667eea;
+  color: #FFEB3B;
 }
 
 .log {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #eee;
+  border-top: 2px solid #FFD700;
 }
 
 .logTitle {
   margin: 0 0 0.75rem 0;
   font-size: 1rem;
-  color: #555;
-  font-weight: 600;
+  color: #FFD700;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .logMessages {
@@ -56,11 +61,27 @@
   overflow-y: auto;
 }
 
+.logMessages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.logMessages::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.logMessages::-webkit-scrollbar-thumb {
+  background: #FFD700;
+  border-radius: 4px;
+}
+
 .logEntry {
   padding: 0.5rem;
   margin-bottom: 0.25rem;
-  background: #f7f7f7;
+  background: #1a1a1a;
+  border-left: 3px solid #FFD700;
   border-radius: 0.25rem;
   font-size: 0.875rem;
-  color: #555;
+  color: #FFC107;
+  font-weight: 600;
 }

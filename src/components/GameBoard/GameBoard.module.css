@@ -7,9 +7,12 @@
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
-  background: white;
+  background: #1a1a1a;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 4px solid #FFD700;
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
 
@@ -36,19 +39,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  color: white;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: 900;
+  color: #1a1a1a;
+  border: 3px solid #FFD700;
+  box-shadow:
+    0 0 10px rgba(255, 215, 0, 0.6),
+    0 2px 4px rgba(0, 0, 0, 0.5);
   transform: translate(-50%, -50%);
   pointer-events: all;
   cursor: help;
   z-index: 10;
+  transition: all 0.3s;
+}
+
+.playerToken:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow:
+    0 0 15px rgba(255, 215, 0, 0.8),
+    0 3px 6px rgba(0, 0, 0, 0.6);
 }
 
 .tokenText {
   font-size: 14px;
   user-select: none;
+  -webkit-user-select: none;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .legend {
@@ -63,17 +78,32 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  background: rgba(45, 45, 45, 0.8);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid #FFD700;
+  font-weight: 700;
+  color: #FFD700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .legendColor {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border: 2px solid #FFD700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
 }
 
 .eliminated {
   text-decoration: line-through;
   opacity: 0.5;
+  border-color: #666;
+  color: #888;
+}
+
+.eliminated .legendColor {
+  border-color: #666;
+  box-shadow: none;
 }
