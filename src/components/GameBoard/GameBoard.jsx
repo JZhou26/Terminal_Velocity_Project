@@ -14,7 +14,7 @@ export function GameBoard({ players }) {
     <div className={styles.container}>
       <div className={styles.boardWrapper}>
         <img
-          src="/assets/board/GameBoardSmall.png"
+          src="/assets/board/OnlineGameBoard.png"
           alt="Game Board"
           className={styles.boardImage}
         />
@@ -61,9 +61,9 @@ export function GameBoard({ players }) {
   );
 }
 
-// Map tile positions (1-36) to coordinates on GameBoardSmall
+// Map tile positions (1-36) to coordinates on OnlineGameBoard
 function getTilePosition(tile) {
-  // Positions are approximate percentages based on GameBoardSmall layout
+  // Positions are approximate percentages based on OnlineGameBoard layout
   const positions = {
     // START (tile 1)
     1: { top: 93, left: 36 },
