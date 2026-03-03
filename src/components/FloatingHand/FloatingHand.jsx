@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Card, CardBack } from '../Card/Card';
+import { PLAYER_COLORS } from '../GameBoard/GameBoard';
 import styles from './FloatingHand.module.css';
 
 export function FloatingHand({
   player,
+  playerIndex,
   selectedCards,
   onCardClick,
   isCurrentPlayer,
@@ -17,6 +19,8 @@ export function FloatingHand({
   marketDrawCards = []
 }) {
   if (!isCurrentPlayer) return null;
+
+  const playerColor = PLAYER_COLORS[playerIndex] || '#FFD700';
 
   const [marketDrawRevealed, setMarketDrawRevealed] = useState(false);
   const [showHandInMarket, setShowHandInMarket] = useState(false);
@@ -51,7 +55,7 @@ export function FloatingHand({
   if (turnPhase === 'buy') {
     return (
       <div className={styles.container}>
-        <div className={styles.handPanel}>
+        <div className={styles.handPanel} style={{ borderColor: playerColor }}>
           {/* Left side - Upgrades */}
           <div className={styles.marketSection}>
             <h3 className={styles.sectionTitle}>Upgrades</h3>
@@ -174,7 +178,7 @@ export function FloatingHand({
   // PLAYER HAND VIEW (Play, Discard, Draw phases)
   return (
     <div className={styles.container}>
-      <div className={styles.handPanel}>
+      <div className={styles.handPanel} style={{ borderColor: playerColor }}>
         {/* Left side - YOUR HAND */}
         <div className={styles.handSection}>
           <h3 className={styles.sectionTitle}>YOUR HAND</h3>

@@ -333,6 +333,7 @@ function GameContent() {
 
       <FloatingHand
         player={currentPlayer}
+        playerIndex={state.currentPlayerIndex}
         selectedCards={selectedCards}
         onCardClick={handleCardClick}
         isCurrentPlayer={true}
