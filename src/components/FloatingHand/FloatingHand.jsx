@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Card, CardBack } from '../Card/Card';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { Card } from '../Card/Card';
 import { PLAYER_COLORS } from '../GameBoard/GameBoard';
 import styles from './FloatingHand.module.css';
 
-export function FloatingHand({
+export const FloatingHand = forwardRef(function FloatingHand({
   player,
   playerIndex,
   selectedCards,
@@ -13,17 +13,45 @@ export function FloatingHand({
   upgradeCards,
   onBuyUpgrade,
   onDrawMarket,
+  onBuyMarketCard,
   onPlayCards,
   onSkipPhase,
   onEndTurn,
-  marketDrawCards = []
-}) {
+  marketDrawCards = [],
+}, ref) {
+  const cardRefs = useRef({});
+
+  useImperativeHandle(ref, () => ({
+    getCardRects(cardIds) {
+      return cardIds.map(id => {
+        const el = cardRefs.current[id];
+        return el ? el.getBoundingClientRect() : null;
+      });
+    },
+  }));
+
+  const [visible, setVisible] = useState(true);
+  const lastScrollY = useRef(window.scrollY);
+  const [marketDrawRevealed, setMarketDrawRevealed] = useState(false);
+  const [showHandInMarket, setShowHandInMarket] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const current = window.scrollY;
+      if (current < lastScrollY.current) {
+        setVisible(true);  // scrolling up
+      } else if (current > lastScrollY.current) {
+        setVisible(false); // scrolling down
+      }
+      lastScrollY.current = current;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   if (!isCurrentPlayer) return null;
 
   const playerColor = PLAYER_COLORS[playerIndex] || '#FFD700';
-
-  const [marketDrawRevealed, setMarketDrawRevealed] = useState(false);
-  const [showHandInMarket, setShowHandInMarket] = useState(false);
 
   // Calculate patience tokens
   const threeTokens = Math.floor(player.patience / 3);
@@ -42,8 +70,8 @@ export function FloatingHand({
   };
 
   const handleSelectMarketCard = (card) => {
-    // Player selected one of the revealed market cards
     setMarketDrawRevealed(false);
+    onBuyMarketCard(card);
   };
 
   const handleSkipMarket = () => {
@@ -54,7 +82,7 @@ export function FloatingHand({
   // MARKET VIEW (Buy Phase)
   if (turnPhase === 'buy') {
     return (
-      <div className={styles.container}>
+      <div className={`${styles.container} ${visible ? '' : styles.hidden}`}>
         <div className={styles.handPanel} style={{ borderColor: playerColor }}>
           {/* Left side - Upgrades */}
           <div className={styles.marketSection}>
@@ -111,19 +139,19 @@ export function FloatingHand({
                   </div>
                 </>
               ) : (
-                /* Revealed cards */
-                marketDrawCards.map((card, index) => (
-                  <div
-                    key={`market-${index}`}
-                    className={styles.cardWrapper}
-                    onClick={() => handleSelectMarketCard(card)}
-                  >
-                    <Card
-                      card={card}
-                      size="normal"
-                    />
-                  </div>
-                ))
+                /* Revealed cards — click one to add to hand */
+                <>
+                  {marketDrawCards.map((card, index) => (
+                    <div
+                      key={`market-${index}`}
+                      className={styles.cardWrapper}
+                      onClick={() => handleSelectMarketCard(card)}
+                      title={`Pick ${card.name}`}
+                    >
+                      <Card card={card} size="normal" />
+                    </div>
+                  ))}
+                </>
               )}
             </div>
 
@@ -177,14 +205,14 @@ export function FloatingHand({
 
   // PLAYER HAND VIEW (Play, Discard, Draw phases)
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${visible ? '' : styles.hidden}`}>
       <div className={styles.handPanel} style={{ borderColor: playerColor }}>
         {/* Left side - YOUR HAND */}
         <div className={styles.handSection}>
           <h3 className={styles.sectionTitle}>YOUR HAND</h3>
           <div className={styles.cardsRow}>
             {player.hand.map((card, index) => (
-              <div key={`${card.id}-${index}`} className={styles.cardWrapper}>
+              <div key={`${card.id}-${index}`} className={styles.cardWrapper} ref={el => { cardRefs.current[card.id] = el; }}>
                 <Card
                   card={card}
                   onClick={onCardClick}
@@ -272,4 +300,4 @@ export function FloatingHand({
       </div>
     </div>
   );
-}
+});
