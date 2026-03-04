@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { StartScreen } from './components/StartScreen/StartScreen';
 import { GameBoard } from './components/GameBoard/GameBoard';
@@ -9,6 +9,7 @@ import { getSection, SECTION_STARTS } from './data/cards';
 import { drawCards } from './utils/deckManager';
 import { DiceRollModal } from './components/DiceRollModal/DiceRollModal';
 import { TargetPlayerModal } from './components/TargetPlayerModal/TargetPlayerModal';
+import { CardPlayAnimation } from './components/CardPlayAnimation/CardPlayAnimation';
 import './App.css';
 
 function GameContent() {
@@ -18,6 +19,9 @@ function GameContent() {
   const [pendingMarketPiles, setPendingMarketPiles] = useState(null);
   const [pendingDiceRoll, setPendingDiceRoll] = useState(null);
   const [pendingTargetSelection, setPendingTargetSelection] = useState(null);
+  const boardRef = useRef(null);
+  const handRef = useRef(null);
+  const [animatingCards, setAnimatingCards] = useState(null);
 
   const handleStartGame = (playerNames) => {
     const gameState = initializeGame(playerNames);
@@ -492,6 +496,33 @@ function GameContent() {
     });
   };
 
+  const handlePlayCardsWithAnimation = () => {
+    if (selectedCards.length === 0 || state.turnPhase !== 'play') {
+      handlePlayCards();
+      return;
+    }
+
+    const cardRects = handRef.current?.getCardRects(selectedCards.map(c => c.id)) ?? [];
+    const boardRect = boardRef.current?.getBoundingClientRect();
+    const endX = boardRect ? boardRect.left + boardRect.width / 2 : window.innerWidth / 2;
+    const endY = boardRect ? boardRect.top + boardRect.height / 2 : window.innerHeight / 2;
+
+    const cards = selectedCards.map((card, i) => ({
+      card,
+      startX: cardRects[i]?.left ?? window.innerWidth / 2,
+      startY: cardRects[i]?.top ?? window.innerHeight,
+      endX,
+      endY,
+    }));
+
+    setAnimatingCards(cards);
+
+    setTimeout(() => {
+      setAnimatingCards(null);
+      handlePlayCards();
+    }, 600);
+  };
+
   if (state.gameStatus === 'setup') {
     return <StartScreen onStartGame={handleStartGame} />;
   }
@@ -500,22 +531,38 @@ function GameContent() {
 
   return (
     <div className="game-container">
-      <GameStatus
-        currentRound={state.currentRound}
-        currentPlayer={currentPlayer.name}
-        turnPhase={state.turnPhase}
-        gameLog={state.gameLog}
-      />
+      <div className="game-header">
+        <div className="game-header-inner">
+          <div className="game-header-plane">
+            <img src="/assets/board/PlaneUp.png" alt="" />
+          </div>
+          <span className="game-header-round">ROUND: {state.currentRound}</span>
+          <div className="game-header-plane">
+            <img src="/assets/board/PlaneDown.png" alt="" />
+          </div>
+        </div>
+      </div>
+      <div className="game-main">
+        <GameBoard
+          players={state.players}
+          currentRound={state.currentRound}
+          eventDiscardPile={state.eventDiscardPile}
+          annoyanceDiscardPile={state.annoyanceDiscardPile}
+          activeEvent={state.activeEvent}
+          activeAnnoyance={state.activeAnnoyance}
+          boardRef={boardRef}
+        />
 
-      <GameBoard
-        players={state.players}
-        eventDiscardPile={state.eventDiscardPile}
-        annoyanceDiscardPile={state.annoyanceDiscardPile}
-        activeEvent={state.activeEvent}
-        activeAnnoyance={state.activeAnnoyance}
-      />
-
+        <GameStatus
+          gameLog={state.gameLog}
+          activeEvent={state.activeEvent}
+          activeAnnoyance={state.activeAnnoyance}
+          eventDiscardPile={state.eventDiscardPile}
+          annoyanceDiscardPile={state.annoyanceDiscardPile}
+        />
+      </div>
       <FloatingHand
+        ref={handRef}
         player={currentPlayer}
         playerIndex={state.currentPlayerIndex}
         selectedCards={selectedCards}
@@ -526,11 +573,14 @@ function GameContent() {
         onBuyUpgrade={handleBuyUpgrade}
         onDrawMarket={handleDrawMarket}
         onBuyMarketCard={handleBuyMarketCard}
-        onPlayCards={handlePlayCards}
+        onPlayCards={handlePlayCardsWithAnimation}
         onSkipPhase={handleSkipPhase}
         onEndTurn={handleEndTurn}
         marketDrawCards={marketDrawCards}
       />
+      {animatingCards && (
+        <CardPlayAnimation animatingCards={animatingCards} />
+      )}
       {pendingDiceRoll && (
         <DiceRollModal
           diceCards={pendingDiceRoll.diceCards}
