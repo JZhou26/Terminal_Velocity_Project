@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './CardPlayAnimation.module.css';
 
 export function CardPlayAnimation({ animatingCards }) {
@@ -9,19 +10,24 @@ export function CardPlayAnimation({ animatingCards }) {
 
   useEffect(() => {
     // One rAF to let the browser paint the starting position, then trigger the transition
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setTriggered(true));
+    let outer, inner;
+    outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => setTriggered(true));
     });
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(outer);
+      cancelAnimationFrame(inner);
+    };
   }, []);
 
-  return (
+  return createPortal(
     <div className={styles.overlay}>
       {animatingCards.map(({ card, startX, startY, endX, endY }) => {
         const cardWidth = 90;
         // translate from start position to end position (centered on board center)
+        const cardHeight = cardWidth * 1.4;
         const dx = endX - startX - cardWidth / 2;
-        const dy = endY - startY - cardWidth * 1.4; // approximate card height
+        const dy = endY - startY - cardHeight / 2;
 
         return (
           <img
@@ -37,6 +43,7 @@ export function CardPlayAnimation({ animatingCards }) {
           />
         );
       })}
-    </div>
+    </div>,
+    document.body
   );
 }
