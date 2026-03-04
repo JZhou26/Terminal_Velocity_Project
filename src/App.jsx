@@ -5,9 +5,10 @@ import { GameBoard } from './components/GameBoard/GameBoard';
 import { GameStatus } from './components/GameStatus/GameStatus';
 import { FloatingHand } from './components/FloatingHand/FloatingHand';
 import { initializeGame } from './utils/gameSetup';
-import { getSection } from './data/cards';
+import { getSection, SECTION_STARTS } from './data/cards';
 import { drawCards } from './utils/deckManager';
 import { DiceRollModal } from './components/DiceRollModal/DiceRollModal';
+import { TargetPlayerModal } from './components/TargetPlayerModal/TargetPlayerModal';
 import './App.css';
 
 function GameContent() {
@@ -16,6 +17,7 @@ function GameContent() {
   const [marketDrawCards, setMarketDrawCards] = useState([]);
   const [pendingMarketPiles, setPendingMarketPiles] = useState(null);
   const [pendingDiceRoll, setPendingDiceRoll] = useState(null);
+  const [pendingTargetSelection, setPendingTargetSelection] = useState(null);
 
   const handleStartGame = (playerNames) => {
     const gameState = initializeGame(playerNames);
@@ -58,6 +60,13 @@ function GameContent() {
         }
       }
 
+      // If any selected card targets another player, show target selection modal first
+      const targetCards = selectedCards.filter(c => c.targetsOtherPlayer);
+      if (targetCards.length > 0) {
+        setPendingTargetSelection({ allSelectedCards: selectedCards });
+        return;
+      }
+
       // If any selected card requires a dice roll, open the modal instead of resolving inline
       const diceCards = selectedCards.filter(c => c.requiresDice);
       if (diceCards.length > 0) {
@@ -74,6 +83,12 @@ function GameContent() {
         newPatience -= 1;
       }
 
+      const activePlayers = state.players.filter(p => !p.isEliminated);
+      const lastPlace = activePlayers.reduce((last, p) =>
+        p.position < last.position ? p : last, activePlayers[0]);
+      const currentIsLastPlace = lastPlace.playerIndex === state.currentPlayerIndex ||
+        (lastPlace.position === currentPlayer.position);
+
       selectedCards.forEach(card => {
         switch (card.name) {
           // --- Movement cards ---
@@ -83,57 +98,43 @@ function GameContent() {
             logParts.push(`${card.name} (+${move} spaces)`);
             break;
           }
-          case 'HOV Lane':
-            newPosition = Math.min(36, newPosition + 3);
-            logParts.push(`${card.name} (+3 spaces)`);
-            break;
-          case 'Express Lane':
-            newPosition = Math.min(36, newPosition + 3);
-            logParts.push(`${card.name} (+3 spaces)`);
-            break;
-          case 'TSA Precheck':
+          case 'Seasoned Driver':
             newPosition = Math.min(36, newPosition + 4);
             logParts.push(`${card.name} (+4 spaces)`);
             break;
-          case 'Hands Free Device':
+          case 'TSA Veteran':
             newPosition = Math.min(36, newPosition + 4);
             logParts.push(`${card.name} (+4 spaces)`);
             break;
-          case 'Complimentary Upgrade':
-            newPosition = Math.min(36, newPosition + 3);
-            logParts.push(`${card.name} (+3 spaces)`);
-            break;
-          case 'Empty Row':
+          case 'Savvy Flyer':
             newPosition = Math.min(36, newPosition + 4);
             logParts.push(`${card.name} (+4 spaces)`);
-            break;
-          case 'Baggage Claim':
-            newPosition = Math.min(36, newPosition + 5);
-            logParts.push(`${card.name} (+5 spaces)`);
             break;
 
-          // --- Special movement cards ---
-          case 'Cutting It Close':
-            newPosition = Math.min(36, newPosition + 2);
-            newPatience -= 1;
-            logParts.push(`${card.name} (+2 spaces, -1 patience)`);
+          // --- Last-place movement cards ---
+          case 'HOV Lane':
+          case 'Express Lane':
+          case 'Empty Row':
+            if (currentIsLastPlace) {
+              newPosition = Math.min(36, newPosition + 6);
+              logParts.push(`${card.name} (+6 spaces, last place bonus)`);
+            } else {
+              logParts.push(`${card.name} (no effect — not in last place)`);
+            }
             break;
-          // Dice cards are handled by handleDiceConfirm via DiceRollModal
 
           // --- Patience cards ---
           case 'Calm Traveling':
-            newPatience += 1;
-            logParts.push(`${card.name} (+1 patience)`);
-            break;
-          case 'Relaxing Spa':
             newPatience += 2;
             logParts.push(`${card.name} (+2 patience)`);
             break;
-          case 'Smooth Flight':
-            newPatience += 3;
-            logParts.push(`${card.name} (+3 patience)`);
+          case 'Relaxing Spa':
+            newPatience += 4;
+            logParts.push(`${card.name} (+4 patience)`);
             break;
 
+          // Dice cards are handled by handleDiceConfirm via DiceRollModal
+          // Cancel/reactive cards cannot be played proactively
           default:
             logParts.push(`${card.name} (no effect)`);
         }
@@ -190,8 +191,17 @@ function GameContent() {
     }
   };
 
+  const handleTargetConfirm = (targetPlayerIndex) => {
+    const { allSelectedCards } = pendingTargetSelection;
+    setPendingTargetSelection(null);
+    const diceCards = allSelectedCards.filter(c => c.requiresDice);
+    if (diceCards.length > 0) {
+      setPendingDiceRoll({ diceCards, allSelectedCards, targetPlayerIndex });
+    }
+  };
+
   const handleDiceConfirm = (rolls) => {
-    const { allSelectedCards } = pendingDiceRoll;
+    const { allSelectedCards, targetPlayerIndex } = pendingDiceRoll;
     setPendingDiceRoll(null);
 
     const currentPlayer = state.players[state.currentPlayerIndex];
@@ -206,6 +216,14 @@ function GameContent() {
       newPatience -= 1;
     }
 
+    const activePlayers = state.players.filter(p => !p.isEliminated);
+    const lastPlace = activePlayers.reduce((last, p) =>
+      p.position < last.position ? p : last, activePlayers[0]);
+    const currentIsLastPlace = lastPlace.playerIndex === state.currentPlayerIndex ||
+      (lastPlace.position === currentPlayer.position);
+
+    const newPlayers = [...state.players];
+
     allSelectedCards.forEach(card => {
       switch (card.name) {
         case 'Casual Traveler': {
@@ -214,75 +232,68 @@ function GameContent() {
           logParts.push(`${card.name} (+${move} spaces)`);
           break;
         }
+        case 'Seasoned Driver':
+          newPosition = Math.min(36, newPosition + 4);
+          logParts.push(`${card.name} (+4 spaces)`);
+          break;
+        case 'TSA Veteran':
+          newPosition = Math.min(36, newPosition + 4);
+          logParts.push(`${card.name} (+4 spaces)`);
+          break;
+        case 'Savvy Flyer':
+          newPosition = Math.min(36, newPosition + 4);
+          logParts.push(`${card.name} (+4 spaces)`);
+          break;
         case 'HOV Lane':
-          newPosition = Math.min(36, newPosition + 3);
-          logParts.push(`${card.name} (+3 spaces)`);
-          break;
         case 'Express Lane':
-          newPosition = Math.min(36, newPosition + 3);
-          logParts.push(`${card.name} (+3 spaces)`);
-          break;
-        case 'TSA Precheck':
-          newPosition = Math.min(36, newPosition + 4);
-          logParts.push(`${card.name} (+4 spaces)`);
-          break;
-        case 'Hands Free Device':
-          newPosition = Math.min(36, newPosition + 4);
-          logParts.push(`${card.name} (+4 spaces)`);
-          break;
-        case 'Complimentary Upgrade':
-          newPosition = Math.min(36, newPosition + 3);
-          logParts.push(`${card.name} (+3 spaces)`);
-          break;
         case 'Empty Row':
-          newPosition = Math.min(36, newPosition + 4);
-          logParts.push(`${card.name} (+4 spaces)`);
+          if (currentIsLastPlace) {
+            newPosition = Math.min(36, newPosition + 6);
+            logParts.push(`${card.name} (+6 spaces, last place bonus)`);
+          } else {
+            logParts.push(`${card.name} (no effect — not in last place)`);
+          }
           break;
-        case 'Baggage Claim':
-          newPosition = Math.min(36, newPosition + 5);
-          logParts.push(`${card.name} (+5 spaces)`);
+        case 'Calm Traveling':
+          newPatience += 2;
+          logParts.push(`${card.name} (+2 patience)`);
           break;
-        case 'Cutting It Close':
-          newPosition = Math.min(36, newPosition + 2);
-          newPatience -= 1;
-          logParts.push(`${card.name} (+2 spaces, -1 patience)`);
+        case 'Relaxing Spa':
+          newPatience += 4;
+          logParts.push(`${card.name} (+4 patience)`);
           break;
         case 'Reckless Driver': {
           const roll = rolls[card.id];
           newPosition = Math.min(36, newPosition + roll);
-          newPatience -= 1;
-          logParts.push(`${card.name} (rolled ${roll}, +${roll} spaces, -1 patience)`);
+          logParts.push(`${card.name} (rolled ${roll}, +${roll} spaces)`);
+          break;
+        }
+        case 'Security Rush': {
+          const roll = rolls[card.id];
+          newPosition = Math.min(36, newPosition + roll);
+          logParts.push(`${card.name} (rolled ${roll}, +${roll} spaces)`);
+          break;
+        }
+        case 'Cutting It Close': {
+          const roll = rolls[card.id];
+          newPosition = Math.min(36, newPosition + roll);
+          logParts.push(`${card.name} (rolled ${roll}, +${roll} spaces)`);
           break;
         }
         case 'Annoying Traveler': {
           const roll = rolls[card.id];
-          if (roll <= 3) {
-            newPatience -= 1;
-            logParts.push(`${card.name} (rolled ${roll}, -1 patience)`);
-          } else {
-            newPosition = Math.min(36, newPosition + 2);
-            logParts.push(`${card.name} (rolled ${roll}, +2 spaces)`);
-          }
+          const target = state.players[targetPlayerIndex];
+          const targetSection = getSection(target.position);
+          const newTargetPosition = Math.max(SECTION_STARTS[targetSection], target.position - roll);
+          newPlayers[targetPlayerIndex] = { ...target, position: newTargetPosition };
+          logParts.push(`${card.name} (rolled ${roll}, ${target.name} moves back ${target.position - newTargetPosition} spaces)`);
           break;
         }
-        case 'Calm Traveling':
-          newPatience += 1;
-          logParts.push(`${card.name} (+1 patience)`);
-          break;
-        case 'Relaxing Spa':
-          newPatience += 2;
-          logParts.push(`${card.name} (+2 patience)`);
-          break;
-        case 'Smooth Flight':
-          newPatience += 3;
-          logParts.push(`${card.name} (+3 patience)`);
-          break;
         default:
           logParts.push(`${card.name} (no effect)`);
       }
     });
 
-    const newPlayers = [...state.players];
     newPlayers[state.currentPlayerIndex] = {
       ...currentPlayer,
       position: newPosition,
@@ -524,6 +535,13 @@ function GameContent() {
         <DiceRollModal
           diceCards={pendingDiceRoll.diceCards}
           onConfirm={handleDiceConfirm}
+        />
+      )}
+      {pendingTargetSelection && (
+        <TargetPlayerModal
+          players={state.players}
+          currentPlayerIndex={state.currentPlayerIndex}
+          onConfirm={handleTargetConfirm}
         />
       )}
     </div>

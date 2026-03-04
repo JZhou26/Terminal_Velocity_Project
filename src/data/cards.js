@@ -7,176 +7,198 @@ export function getSection(position) {
   return 'airplane';
 }
 
-// Basic Deck Cards (40 total)
+// First tile of each section — used to clamp backwards movement
+export const SECTION_STARTS = { drive: 1, security: 13, airplane: 25 };
+
+// Basic Deck Cards (40 total per rulebook)
 export const basicCards = [
-  // Casual Traveler (x12) - Move 2 spaces in Drive section
-  ...Array(12).fill(null).map((_, i) => ({
+  // Casual Traveler (x14) - Move 2 spaces. All Sections.
+  ...Array(14).fill(null).map((_, i) => ({
     id: `casual-traveler-${i}`,
     name: 'Casual Traveler',
     type: 'basic',
     category: 'movement',
-    section: 'drive',
+    section: 'all',
     imagePath: '/assets/cards/CASUALTRAVELER.png',
-    description: 'Move 2 spaces (3 with Seasoned Traveler)',
+    description: 'Move forward 2 spaces. (All Sections)',
   })),
 
-  // Calm Traveling (x10) - Gain 1 patience
-  ...Array(10).fill(null).map((_, i) => ({
+  // Calm Traveling (x8) - Gain 2 patience. All Sections.
+  ...Array(8).fill(null).map((_, i) => ({
     id: `calm-traveling-${i}`,
     name: 'Calm Traveling',
     type: 'basic',
     category: 'patience',
     section: 'all',
     imagePath: '/assets/cards/CALMTRAVELING.png',
-    description: 'Gain 1 patience',
+    description: 'Gain 2 patience. (All Sections)',
   })),
 
-  // HOV Lane (x8) - Move 3 spaces in Drive section
-  ...Array(8).fill(null).map((_, i) => ({
-    id: `hov-lane-${i}`,
-    name: 'HOV Lane',
+  // Seasoned Driver (x4) - Move 4 spaces. Drive Section.
+  ...Array(4).fill(null).map((_, i) => ({
+    id: `seasoned-driver-${i}`,
+    name: 'Seasoned Driver',
     type: 'basic',
     category: 'movement',
     section: 'drive',
-    imagePath: '/assets/cards/HOVLANE.png',
-    description: 'Move 3 spaces',
+    imagePath: '/assets/cards/SeasonedDriver.png',
+    description: 'Move forward 4 spaces. (Drive Section)',
   })),
 
-  // Reckless Driver (x5) - Roll die, move that many, lose 1 patience
-  ...Array(5).fill(null).map((_, i) => ({
+  // Reckless Driver (x2) - Roll a dice, move forward that many spaces. Drive Section.
+  ...Array(2).fill(null).map((_, i) => ({
     id: `reckless-driver-${i}`,
     name: 'Reckless Driver',
     type: 'basic',
     category: 'special',
     section: 'drive',
     imagePath: '/assets/cards/RecklessDriver.png',
-    description: 'Roll die, move that many spaces, lose 1 patience',
+    description: 'Roll a dice, move forward that many spaces. (Drive Section)',
     requiresDice: true,
   })),
 
-  // Annoying Traveler (x5) - Roll die: 1-3 lose 1 patience, 4-6 move 2 spaces
-  ...Array(5).fill(null).map((_, i) => ({
-    id: `annoying-traveler-${i}`,
-    name: 'Annoying Traveler',
+  // TSA Veteran (x4) - Move 4 spaces. Security Section.
+  ...Array(4).fill(null).map((_, i) => ({
+    id: `tsa-veteran-${i}`,
+    name: 'TSA Veteran',
+    type: 'basic',
+    category: 'movement',
+    section: 'security',
+    imagePath: '/assets/cards/TSAVeteran.png',
+    description: 'Move forward 4 spaces. (Security Section)',
+  })),
+
+  // Security Rush (x2) - Roll a dice, move forward that many spaces. Security Section.
+  ...Array(2).fill(null).map((_, i) => ({
+    id: `security-rush-${i}`,
+    name: 'Security Rush',
     type: 'basic',
     category: 'special',
-    section: 'all',
-    imagePath: '/assets/cards/AnnoyingTraveler.png',
-    description: 'Roll die: 1-3 lose 1 patience, 4-6 move 2 spaces',
+    section: 'security',
+    imagePath: '/assets/cards/SecurityRush.png',
+    description: 'Roll a dice, move forward that many spaces. (Security Section)',
+    requiresDice: true,
+  })),
+
+  // Savvy Flyer (x4) - Move 4 spaces. Airplane Section.
+  ...Array(4).fill(null).map((_, i) => ({
+    id: `savvy-flyer-${i}`,
+    name: 'Savvy Flyer',
+    type: 'basic',
+    category: 'movement',
+    section: 'airplane',
+    imagePath: '/assets/cards/SavvyFlyer.png',
+    description: 'Move forward 4 spaces. (Airplane Section)',
+  })),
+
+  // Cutting It Close (x2) - Roll a dice, move forward that many spaces. Airplane Section.
+  ...Array(2).fill(null).map((_, i) => ({
+    id: `cutting-it-close-${i}`,
+    name: 'Cutting It Close',
+    type: 'basic',
+    category: 'special',
+    section: 'airplane',
+    imagePath: '/assets/cards/CuttingitClose.png',
+    description: 'Roll a dice, move forward that many spaces. (Airplane Section)',
     requiresDice: true,
   })),
 ];
 
-// Market Deck Cards (31 total)
+// Market Deck Cards (31 total per rulebook)
 export const marketCards = [
-  // Express Lane (x5) - Move 3 spaces in Security section
-  ...Array(5).fill(null).map((_, i) => ({
-    id: `express-lane-${i}`,
-    name: 'Express Lane',
+  // Annoying Traveler (x8) - Choose a player, roll dice, move them back that many spaces. All Sections.
+  ...Array(8).fill(null).map((_, i) => ({
+    id: `annoying-traveler-${i}`,
+    name: 'Annoying Traveler',
     type: 'market',
-    category: 'movement',
-    section: 'security',
-    imagePath: '/assets/cards/Express Lane.png',
-    description: 'Move 3 spaces',
+    category: 'special',
+    section: 'all',
+    imagePath: '/assets/cards/AnnoyingTraveler.png',
+    description: 'Choose a player. Roll a dice and move them back that many spaces. (All Sections)',
+    requiresDice: true,
+    targetsOtherPlayer: true,
   })),
 
-  // Relaxing Spa (x4) - Gain 2 patience
-  ...Array(4).fill(null).map((_, i) => ({
+  // Relaxing Spa (x8) - Gain 4 patience. All Sections.
+  ...Array(8).fill(null).map((_, i) => ({
     id: `relaxing-spa-${i}`,
     name: 'Relaxing Spa',
     type: 'market',
     category: 'patience',
     section: 'all',
     imagePath: '/assets/cards/RelaxingSpa.png',
-    description: 'Gain 2 patience',
+    description: 'Gain 4 patience. (All Sections)',
   })),
 
-  // TSA Precheck (x3) - Move 4 spaces in Security section
-  ...Array(3).fill(null).map((_, i) => ({
-    id: `tsa-precheck-${i}`,
-    name: 'TSA Precheck',
-    type: 'market',
-    category: 'movement',
-    section: 'security',
-    imagePath: '/assets/cards/TSAPrecheck.png',
-    description: 'Move 4 spaces',
-  })),
-
-  // Hands Free Device (x3) - Move 4 spaces in Drive section
-  ...Array(3).fill(null).map((_, i) => ({
-    id: `hands-free-device-${i}`,
-    name: 'Hands Free Device',
+  // HOV Lane (x1) - If in last place, move forward 6 spaces. Drive Section.
+  ...Array(1).fill(null).map((_, i) => ({
+    id: `hov-lane-${i}`,
+    name: 'HOV Lane',
     type: 'market',
     category: 'movement',
     section: 'drive',
-    imagePath: '/assets/cards/HandsFreeDevice.png',
-    description: 'Move 4 spaces',
+    imagePath: '/assets/cards/HOVLANE.png',
+    description: 'If in last place, move forward 6 spaces. (Drive Section)',
+    requiresLastPlace: true,
   })),
 
-  // Complimentary Upgrade (x3) - Move 3 spaces in Airplane section
-  ...Array(3).fill(null).map((_, i) => ({
-    id: `complimentary-upgrade-${i}`,
-    name: 'Complimentary Upgrade',
+  // Express Lane (x1) - If in last place, move forward 6 spaces. Security Section.
+  ...Array(1).fill(null).map((_, i) => ({
+    id: `express-lane-${i}`,
+    name: 'Express Lane',
     type: 'market',
     category: 'movement',
-    section: 'airplane',
-    imagePath: '/assets/cards/ComplimentaryUpgrade.png',
-    description: 'Move 3 spaces',
+    section: 'security',
+    imagePath: '/assets/cards/Express%20Lane.png',
+    description: 'If in last place, move forward 6 spaces. (Security Section)',
+    requiresLastPlace: true,
   })),
 
-  // Empty Row (x3) - Move 4 spaces in Airplane section
-  ...Array(3).fill(null).map((_, i) => ({
+  // Empty Row (x1) - If in last place, move forward 6 spaces. Airplane Section.
+  ...Array(1).fill(null).map((_, i) => ({
     id: `empty-row-${i}`,
     name: 'Empty Row',
     type: 'market',
     category: 'movement',
     section: 'airplane',
     imagePath: '/assets/cards/EmptyRow.png',
-    description: 'Move 4 spaces',
+    description: 'If in last place, move forward 6 spaces. (Airplane Section)',
+    requiresLastPlace: true,
   })),
 
-  // Cutting It Close (x3) - Move 2 spaces, lose 1 patience
-  ...Array(3).fill(null).map((_, i) => ({
-    id: `cutting-it-close-${i}`,
-    name: 'Cutting It Close',
-    type: 'market',
-    category: 'special',
-    section: 'all',
-    imagePath: '/assets/cards/CuttingitClose.png',
-    description: 'Move 2 spaces, lose 1 patience',
-  })),
-
-  // Baggage Claim (x2) - Move 5 spaces in Airplane section
-  ...Array(2).fill(null).map((_, i) => ({
-    id: `baggage-claim-${i}`,
-    name: 'Baggage Claim',
-    type: 'market',
-    category: 'movement',
-    section: 'airplane',
-    imagePath: '/assets/cards/BaggageClaim.png',
-    description: 'Move 5 spaces',
-  })),
-
-  // Smooth Flight (x2) - Gain 3 patience
-  ...Array(2).fill(null).map((_, i) => ({
-    id: `smooth-flight-${i}`,
-    name: 'Smooth Flight',
-    type: 'market',
-    category: 'patience',
-    section: 'all',
-    imagePath: '/assets/cards/SmoothFlight.png',
-    description: 'Gain 3 patience',
-  })),
-
-  // Cancel Card (x3) - Cancel an Event or Annoyance card
-  ...Array(3).fill(null).map((_, i) => ({
-    id: `cancel-${i}`,
-    name: 'Cancel',
+  // Hands Free Device (x4) - Cancel an event for you in the Drive Section. Played reactively.
+  ...Array(4).fill(null).map((_, i) => ({
+    id: `hands-free-device-${i}`,
+    name: 'Hands Free Device',
     type: 'market',
     category: 'cancel',
-    section: 'all',
-    imagePath: '/assets/cards/Cancel.png',
-    description: 'Cancel an Event or Annoyance card',
+    section: 'drive',
+    imagePath: '/assets/cards/HandsFreeDevice.png',
+    description: 'Cancel an event for you in the Drive Section. Played reactively.',
+    isReactive: true,
+  })),
+
+  // Security Escort (x4) - Cancel an event for you in the Security Section. Played reactively.
+  ...Array(4).fill(null).map((_, i) => ({
+    id: `security-escort-${i}`,
+    name: 'Security Escort',
+    type: 'market',
+    category: 'cancel',
+    section: 'security',
+    imagePath: '/assets/cards/SecurityEscort.png',
+    description: 'Cancel an event for you in the Security Section. Played reactively.',
+    isReactive: true,
+  })),
+
+  // Complimentary Upgrade (x4) - Cancel an event for you in the Airplane Section. Played reactively.
+  ...Array(4).fill(null).map((_, i) => ({
+    id: `complimentary-upgrade-${i}`,
+    name: 'Complimentary Upgrade',
+    type: 'market',
+    category: 'cancel',
+    section: 'airplane',
+    imagePath: '/assets/cards/ComplimentaryUpgrade.png',
+    description: 'Cancel an event for you in the Airplane Section. Played reactively.',
     isReactive: true,
   })),
 ];
@@ -190,7 +212,7 @@ export const upgradeCards = [
     category: 'special',
     section: 'all',
     imagePath: '/assets/cards/ExpertTraveler.png',
-    description: 'Remove section restrictions on movement cards',
+    description: 'Section-specific movement cards are now applicable for all sections.',
     cost: 4,
     isPermanent: true,
   },
@@ -201,7 +223,7 @@ export const upgradeCards = [
     category: 'special',
     section: 'all',
     imagePath: '/assets/cards/SeasonedTraveler.png',
-    description: 'Casual Traveler moves 3 spaces instead of 2',
+    description: 'All Casual Traveler cards now move forward 3 instead of 2.',
     cost: 4,
     isPermanent: true,
   },
@@ -210,20 +232,20 @@ export const upgradeCards = [
     name: 'Emergency Brake',
     type: 'upgrade',
     category: 'special',
-    section: 'drive',
+    section: 'all',
     imagePath: '/assets/cards/EmergencyBrake.png',
-    description: 'Immune to Events while in Drive section',
+    description: 'Ignore all events in the Drive Section.',
     cost: 4,
     isPermanent: true,
   },
   {
-    id: 'tsa-precheck-upgrade',
+    id: 'tsa-precheck',
     name: 'TSA Precheck',
     type: 'upgrade',
     category: 'special',
-    section: 'security',
+    section: 'all',
     imagePath: '/assets/cards/TSAPrecheck.png',
-    description: 'Immune to Events while in Security section',
+    description: 'Ignore all events in the Security Section.',
     cost: 4,
     isPermanent: true,
   },
@@ -232,9 +254,9 @@ export const upgradeCards = [
     name: "Captain's Friend",
     type: 'upgrade',
     category: 'special',
-    section: 'airplane',
+    section: 'all',
     imagePath: '/assets/cards/CapitainsFriend.png',
-    description: 'Annoyance cards only cost 1 patience',
+    description: 'All Annoyance events will be reduced to only losing 1 patience.',
     cost: 4,
     isPermanent: true,
   },
