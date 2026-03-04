@@ -7,12 +7,15 @@ import { FloatingHand } from './components/FloatingHand/FloatingHand';
 import { initializeGame } from './utils/gameSetup';
 import { getSection } from './data/cards';
 import { drawCards } from './utils/deckManager';
+import { DiceRollModal } from './components/DiceRollModal/DiceRollModal';
 import './App.css';
 
 function GameContent() {
   const { state, dispatch } = useGame();
   const [selectedCards, setSelectedCards] = useState([]);
   const [marketDrawCards, setMarketDrawCards] = useState([]);
+  const [pendingMarketPiles, setPendingMarketPiles] = useState(null);
+  const [pendingDiceRoll, setPendingDiceRoll] = useState(null);
 
   const handleStartGame = (playerNames) => {
     const gameState = initializeGame(playerNames);
@@ -39,73 +42,100 @@ function GameContent() {
     const currentPlayer = state.players[state.currentPlayerIndex];
 
     if (state.turnPhase === 'play') {
-      // Play cards logic
+      const section = getSection(currentPlayer.position);
+      const hasExpertTraveler = currentPlayer.upgrades.some(u => u.id === 'expert-traveler');
+      const hasSeasonedTraveler = currentPlayer.upgrades.some(u => u.id === 'seasoned-traveler');
+
+      // Validate section restrictions before playing — don't consume unplayable cards
+      for (const card of selectedCards) {
+        if (card.section !== 'all' && card.section !== section && !hasExpertTraveler) {
+          addLog(`${currentPlayer.name} cannot play ${card.name} in the ${section} section!`);
+          return;
+        }
+        if (card.category === 'cancel') {
+          addLog(`Cancel cards can only be played reactively when an Event or Annoyance is drawn.`);
+          return;
+        }
+      }
+
+      // If any selected card requires a dice roll, open the modal instead of resolving inline
+      const diceCards = selectedCards.filter(c => c.requiresDice);
+      if (diceCards.length > 0) {
+        setPendingDiceRoll({ diceCards, allSelectedCards: selectedCards });
+        return;
+      }
+
       let newPosition = currentPlayer.position;
       let newPatience = currentPlayer.patience;
+      const logParts = [];
 
-      // Cost patience for 2nd card
+      // Cost patience for playing 2 cards in one turn
       if (selectedCards.length === 2) {
         newPatience -= 1;
       }
 
-      // Execute card effects (simplified for now)
       selectedCards.forEach(card => {
-        const section = getSection(currentPlayer.position);
-        const hasExpertTraveler = currentPlayer.upgrades.some(u => u.id === 'expert-traveler');
-
-        // Check if card can be played in current section
-        if (card.section !== 'all' && card.section !== section && !hasExpertTraveler) {
-          addLog(`Cannot play ${card.name} in ${section} section!`);
-          return;
-        }
-
-        // Apply card effects
-        if (card.category === 'movement') {
-          let movement = 0;
-          switch (card.name) {
-            case 'Casual Traveler':
-              const hasSeasonedTraveler = currentPlayer.upgrades.some(u => u.id === 'seasoned-traveler');
-              movement = hasSeasonedTraveler ? 3 : 2;
-              break;
-            case 'HOV Lane':
-              movement = 3;
-              break;
-            case 'Express Lane':
-              movement = 3;
-              break;
-            case 'TSA Precheck':
-              movement = 4;
-              break;
-            case 'Hands Free Device':
-              movement = 4;
-              break;
-            case 'Complimentary Upgrade':
-              movement = 3;
-              break;
-            case 'Empty Row':
-              movement = 4;
-              break;
-            case 'Baggage Claim':
-              movement = 5;
-              break;
-            case 'Cutting It Close':
-              movement = 2;
-              newPatience -= 1;
-              break;
+        switch (card.name) {
+          // --- Movement cards ---
+          case 'Casual Traveler': {
+            const move = hasSeasonedTraveler ? 3 : 2;
+            newPosition = Math.min(36, newPosition + move);
+            logParts.push(`${card.name} (+${move} spaces)`);
+            break;
           }
-          newPosition = Math.min(36, newPosition + movement);
-        } else if (card.category === 'patience') {
-          switch (card.name) {
-            case 'Calm Traveling':
-              newPatience += 1;
-              break;
-            case 'Relaxing Spa':
-              newPatience += 2;
-              break;
-            case 'Smooth Flight':
-              newPatience += 3;
-              break;
-          }
+          case 'HOV Lane':
+            newPosition = Math.min(36, newPosition + 3);
+            logParts.push(`${card.name} (+3 spaces)`);
+            break;
+          case 'Express Lane':
+            newPosition = Math.min(36, newPosition + 3);
+            logParts.push(`${card.name} (+3 spaces)`);
+            break;
+          case 'TSA Precheck':
+            newPosition = Math.min(36, newPosition + 4);
+            logParts.push(`${card.name} (+4 spaces)`);
+            break;
+          case 'Hands Free Device':
+            newPosition = Math.min(36, newPosition + 4);
+            logParts.push(`${card.name} (+4 spaces)`);
+            break;
+          case 'Complimentary Upgrade':
+            newPosition = Math.min(36, newPosition + 3);
+            logParts.push(`${card.name} (+3 spaces)`);
+            break;
+          case 'Empty Row':
+            newPosition = Math.min(36, newPosition + 4);
+            logParts.push(`${card.name} (+4 spaces)`);
+            break;
+          case 'Baggage Claim':
+            newPosition = Math.min(36, newPosition + 5);
+            logParts.push(`${card.name} (+5 spaces)`);
+            break;
+
+          // --- Special movement cards ---
+          case 'Cutting It Close':
+            newPosition = Math.min(36, newPosition + 2);
+            newPatience -= 1;
+            logParts.push(`${card.name} (+2 spaces, -1 patience)`);
+            break;
+          // Dice cards are handled by handleDiceConfirm via DiceRollModal
+
+          // --- Patience cards ---
+          case 'Calm Traveling':
+            newPatience += 1;
+            logParts.push(`${card.name} (+1 patience)`);
+            break;
+          case 'Relaxing Spa':
+            newPatience += 2;
+            logParts.push(`${card.name} (+2 patience)`);
+            break;
+          case 'Smooth Flight':
+            newPatience += 3;
+            logParts.push(`${card.name} (+3 patience)`);
+            break;
+
+          default:
+            logParts.push(`${card.name} (no effect)`);
         }
       });
 
@@ -119,7 +149,6 @@ function GameContent() {
         cardsPlayedThisTurn: currentPlayer.cardsPlayedThisTurn + selectedCards.length,
       };
 
-      // Move cards to discard
       const newBasicDiscard = [...state.basicDiscardPile, ...selectedCards];
 
       dispatch({
@@ -132,7 +161,7 @@ function GameContent() {
         },
       });
 
-      addLog(`${currentPlayer.name} played ${selectedCards.length} card(s)`);
+      addLog(`${currentPlayer.name} played: ${logParts.join(', ')}`);
       setSelectedCards([]);
     } else if (state.turnPhase === 'discard') {
       // Discard cards
@@ -154,10 +183,128 @@ function GameContent() {
         },
       });
 
-      addLog(`${currentPlayer.name} discarded ${selectedCards.length} card(s)`);
+      const discardNames = selectedCards.map(c => c.name).join(' + ');
+      addLog(`${currentPlayer.name} discarded: ${discardNames}`);
       setSelectedCards([]);
       handleDrawPhase(newPlayers);
     }
+  };
+
+  const handleDiceConfirm = (rolls) => {
+    const { allSelectedCards } = pendingDiceRoll;
+    setPendingDiceRoll(null);
+
+    const currentPlayer = state.players[state.currentPlayerIndex];
+    const hasSeasonedTraveler = currentPlayer.upgrades.some(u => u.id === 'seasoned-traveler');
+
+    let newPosition = currentPlayer.position;
+    let newPatience = currentPlayer.patience;
+    const logParts = [];
+
+    // 2-card penalty: handlePlayCards returned early (before applying this cost) when dice cards detected
+    if (allSelectedCards.length === 2) {
+      newPatience -= 1;
+    }
+
+    allSelectedCards.forEach(card => {
+      switch (card.name) {
+        case 'Casual Traveler': {
+          const move = hasSeasonedTraveler ? 3 : 2;
+          newPosition = Math.min(36, newPosition + move);
+          logParts.push(`${card.name} (+${move} spaces)`);
+          break;
+        }
+        case 'HOV Lane':
+          newPosition = Math.min(36, newPosition + 3);
+          logParts.push(`${card.name} (+3 spaces)`);
+          break;
+        case 'Express Lane':
+          newPosition = Math.min(36, newPosition + 3);
+          logParts.push(`${card.name} (+3 spaces)`);
+          break;
+        case 'TSA Precheck':
+          newPosition = Math.min(36, newPosition + 4);
+          logParts.push(`${card.name} (+4 spaces)`);
+          break;
+        case 'Hands Free Device':
+          newPosition = Math.min(36, newPosition + 4);
+          logParts.push(`${card.name} (+4 spaces)`);
+          break;
+        case 'Complimentary Upgrade':
+          newPosition = Math.min(36, newPosition + 3);
+          logParts.push(`${card.name} (+3 spaces)`);
+          break;
+        case 'Empty Row':
+          newPosition = Math.min(36, newPosition + 4);
+          logParts.push(`${card.name} (+4 spaces)`);
+          break;
+        case 'Baggage Claim':
+          newPosition = Math.min(36, newPosition + 5);
+          logParts.push(`${card.name} (+5 spaces)`);
+          break;
+        case 'Cutting It Close':
+          newPosition = Math.min(36, newPosition + 2);
+          newPatience -= 1;
+          logParts.push(`${card.name} (+2 spaces, -1 patience)`);
+          break;
+        case 'Reckless Driver': {
+          const roll = rolls[card.id];
+          newPosition = Math.min(36, newPosition + roll);
+          newPatience -= 1;
+          logParts.push(`${card.name} (rolled ${roll}, +${roll} spaces, -1 patience)`);
+          break;
+        }
+        case 'Annoying Traveler': {
+          const roll = rolls[card.id];
+          if (roll <= 3) {
+            newPatience -= 1;
+            logParts.push(`${card.name} (rolled ${roll}, -1 patience)`);
+          } else {
+            newPosition = Math.min(36, newPosition + 2);
+            logParts.push(`${card.name} (rolled ${roll}, +2 spaces)`);
+          }
+          break;
+        }
+        case 'Calm Traveling':
+          newPatience += 1;
+          logParts.push(`${card.name} (+1 patience)`);
+          break;
+        case 'Relaxing Spa':
+          newPatience += 2;
+          logParts.push(`${card.name} (+2 patience)`);
+          break;
+        case 'Smooth Flight':
+          newPatience += 3;
+          logParts.push(`${card.name} (+3 patience)`);
+          break;
+        default:
+          logParts.push(`${card.name} (no effect)`);
+      }
+    });
+
+    const newPlayers = [...state.players];
+    newPlayers[state.currentPlayerIndex] = {
+      ...currentPlayer,
+      position: newPosition,
+      patience: Math.max(0, newPatience),
+      hand: currentPlayer.hand.filter(c => !allSelectedCards.some(sc => sc.id === c.id)),
+      cardsPlayedThisTurn: currentPlayer.cardsPlayedThisTurn + allSelectedCards.length,
+    };
+
+    const newBasicDiscard = [...state.basicDiscardPile, ...allSelectedCards];
+
+    dispatch({
+      type: 'INITIALIZE_GAME',
+      payload: {
+        ...state,
+        players: newPlayers,
+        basicDiscardPile: newBasicDiscard,
+        turnPhase: 'discard',
+      },
+    });
+
+    addLog(`${currentPlayer.name} played: ${logParts.join(', ')}`);
+    setSelectedCards([]);
   };
 
   const handleDrawPhase = (players = state.players) => {
@@ -275,7 +422,7 @@ function GameContent() {
       },
     });
 
-    addLog(`${currentPlayer.name} bought ${upgrade.name} for ${upgrade.cost} patience`);
+    addLog(`${currentPlayer.name} bought upgrade: ${upgrade.name} (cost ${upgrade.cost} patience)`);
   };
 
   const handleDrawMarket = () => {
@@ -286,25 +433,45 @@ function GameContent() {
       return;
     }
 
-    // Draw 2 cards from market deck
+    // Draw 2 cards from market deck (only marketCards, no upgrades)
     const result = drawCards(state.marketDrawPile, state.marketDiscardPile, 2);
     if (result.drawnCards.length === 0) {
       addLog('Market deck is empty!');
       return;
     }
 
-    // Store the 2 cards to display
+    // Store drawn cards for display — save the new pile state for when player chooses
     setMarketDrawCards(result.drawnCards);
+    setPendingMarketPiles({ drawPile: result.newDrawPile, discardPile: result.newDiscardPile });
+  };
 
-    // Don't add to hand yet - player will choose one
+  const handleBuyMarketCard = (chosenCard) => {
+    const currentPlayer = state.players[state.currentPlayerIndex];
+    if (!pendingMarketPiles) return;
+
+    // Add chosen card to hand, discard the other(s), deduct 1 patience
+    const otherCards = marketDrawCards.filter(c => c.id !== chosenCard.id);
+    const newPlayers = [...state.players];
+    newPlayers[state.currentPlayerIndex] = {
+      ...currentPlayer,
+      patience: currentPlayer.patience - 1,
+      hand: [...currentPlayer.hand, chosenCard],
+    };
+
     dispatch({
       type: 'INITIALIZE_GAME',
       payload: {
         ...state,
-        marketDrawPile: result.newDrawPile,
-        marketDiscardPile: result.newDiscardPile,
+        players: newPlayers,
+        marketDrawPile: pendingMarketPiles.drawPile,
+        marketDiscardPile: [...pendingMarketPiles.discardPile, ...otherCards],
+        turnPhase: 'play',
       },
     });
+
+    addLog(`${currentPlayer.name} bought from market: ${chosenCard.name}`);
+    setMarketDrawCards([]);
+    setPendingMarketPiles(null);
   };
 
   const addLog = (message) => {
@@ -329,7 +496,13 @@ function GameContent() {
         gameLog={state.gameLog}
       />
 
-      <GameBoard players={state.players} />
+      <GameBoard
+        players={state.players}
+        eventDiscardPile={state.eventDiscardPile}
+        annoyanceDiscardPile={state.annoyanceDiscardPile}
+        activeEvent={state.activeEvent}
+        activeAnnoyance={state.activeAnnoyance}
+      />
 
       <FloatingHand
         player={currentPlayer}
@@ -341,11 +514,18 @@ function GameContent() {
         upgradeCards={state.upgradeCards}
         onBuyUpgrade={handleBuyUpgrade}
         onDrawMarket={handleDrawMarket}
+        onBuyMarketCard={handleBuyMarketCard}
         onPlayCards={handlePlayCards}
         onSkipPhase={handleSkipPhase}
         onEndTurn={handleEndTurn}
         marketDrawCards={marketDrawCards}
       />
+      {pendingDiceRoll && (
+        <DiceRollModal
+          diceCards={pendingDiceRoll.diceCards}
+          onConfirm={handleDiceConfirm}
+        />
+      )}
     </div>
   );
 }
