@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { StartScreen } from './components/StartScreen/StartScreen';
 import { GameBoard } from './components/GameBoard/GameBoard';
@@ -22,6 +22,11 @@ function GameContent() {
   const boardRef = useRef(null);
   const handRef = useRef(null);
   const [animatingCards, setAnimatingCards] = useState(null);
+  const animationTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => { clearTimeout(animationTimerRef.current); };
+  }, []);
 
   const handleStartGame = (playerNames) => {
     const gameState = initializeGame(playerNames);
@@ -497,10 +502,13 @@ function GameContent() {
   };
 
   const handlePlayCardsWithAnimation = () => {
+    // Animation only runs during the play phase; discard etc. pass through directly
     if (selectedCards.length === 0 || state.turnPhase !== 'play') {
       handlePlayCards();
       return;
     }
+    // Prevent double-play if animation already in flight
+    if (animatingCards !== null) return;
 
     const cardRects = handRef.current?.getCardRects(selectedCards.map(c => c.id)) ?? [];
     const boardRect = boardRef.current?.getBoundingClientRect();
@@ -517,7 +525,7 @@ function GameContent() {
 
     setAnimatingCards(cards);
 
-    setTimeout(() => {
+    animationTimerRef.current = setTimeout(() => {
       setAnimatingCards(null);
       handlePlayCards();
     }, 600);
