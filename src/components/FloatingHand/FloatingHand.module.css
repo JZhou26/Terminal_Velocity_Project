@@ -1,22 +1,29 @@
 .container {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
+  left: 0;
   width: 100%;
+  z-index: 1000;
   display: flex;
   justify-content: center;
   padding-bottom: 1rem;
+  padding-top: 1rem;
+  transform: translateY(0);
+  transition: transform 0.3s ease-in-out;
 }
+
+.hidden {
+  transform: translateY(110%);
+}
+
 
 .handPanel {
   background: #000000;
   border: 3px solid #FFD700;
   border-radius: 0.5rem;
-  padding: 1.5rem 2rem;
+  padding: 0.875rem 1.5rem;
   display: flex;
-  gap: 3rem;
+  gap: 1.875rem;
   align-items: flex-start;
   box-shadow:
     0 0 30px rgba(255, 215, 0, 0.5),
@@ -35,21 +42,21 @@
 .patienceSection {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  min-width: 200px;
+  gap: 0.5rem;
+  min-width: 175px;
 }
 
 .actionsSection {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  min-width: 180px;
+  gap: 0.5rem;
+  min-width: 163px;
   justify-content: center;
 }
 
 .sectionTitle {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 900;
   color: #FFFFFF;
   text-transform: uppercase;
@@ -58,24 +65,32 @@
 
 .cardsRow {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   align-items: flex-end;
 }
 
 .cardWrapper {
   transition: transform 0.2s;
   cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 .cardWrapper:hover {
   transform: translateY(-8px);
+  z-index: 200;
+}
+
+.cardHidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .emptySlot {
-  width: 120px;
-  height: 170px;
+  width: 90px;
+  height: 125px;
   border: 2px dashed #FFD700;
-  border-radius: 0.5rem;
+  border-radius: 0;
   background: rgba(255, 215, 0, 0.05);
 }
 
@@ -94,15 +109,15 @@
 
 .token3,
 .token1 {
-  width: 40px;
-  height: 40px;
+  width: 33px;
+  height: 33px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  font-size: 1.2rem;
-  border: 3px solid #1a1a1a;
+  font-size: 0.9rem;
+  border: 2px solid #1a1a1a;
   box-shadow:
     0 2px 6px rgba(0, 0, 0, 0.5),
     inset 0 1px 2px rgba(255, 255, 255, 0.3);
@@ -125,8 +140,8 @@
 }
 
 .totalPatience {
-  margin-top: 0.5rem;
-  font-size: 1rem;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
   font-weight: 900;
   color: #FFFFFF;
   text-transform: uppercase;
@@ -135,12 +150,12 @@
 
 /* ACTION BUTTONS */
 .actionButton {
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 0.9rem;
   background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
   color: #000000;
-  border: 3px solid #000000;
+  border: 2px solid #000000;
   border-radius: 0.5rem;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 900;
   cursor: pointer;
   transition: all 0.3s;
@@ -164,12 +179,12 @@
 }
 
 .secondaryButton {
-  padding: 0.65rem 1.25rem;
+  padding: 0.425rem 0.9rem;
   background: transparent;
   color: #FFD700;
   border: 2px solid #FFD700;
   border-radius: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 900;
   cursor: pointer;
   transition: all 0.3s;
@@ -179,47 +194,50 @@
 
 .secondaryButton:hover {
   background: rgba(255, 215, 0, 0.1);
-  border-color: #FFC107;
+  border-color: #FFD700;
 }
 
 /* MARKET VIEW */
 .marketSection {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
   flex: 1;
 }
 
 .upgradesRow {
   display: flex;
   gap: 0.75rem;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .upgradeWrapper {
   transition: transform 0.2s, opacity 0.3s;
+  position: relative;
+  z-index: 1;
 }
 
 .upgradeWrapper:hover {
   transform: translateY(-8px);
+  z-index: 200;
 }
 
 .marketDrawSection {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  min-width: 400px;
+  gap: 0.5rem;
+  min-width: 300px;
 }
 
 .marketDrawRow {
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-end;
+  gap: 0.5rem;
+  align-items: flex-start;
 }
 
 .marketBackCard {
-  width: 120px;
-  border-radius: 0.5rem;
+  width: 90px;
+  border-radius: 0;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s;
@@ -242,17 +260,17 @@
 .marketButtons {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.4rem;
   justify-content: center;
 }
 
 .marketActionButton {
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 0.9rem;
   background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
   color: #000000;
-  border: 3px solid #000000;
+  border: 2px solid #000000;
   border-radius: 0.5rem;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 900;
   cursor: pointer;
   transition: all 0.3s;
@@ -260,7 +278,7 @@
   letter-spacing: 1px;
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
   white-space: nowrap;
-  min-width: 140px;
+  min-width: 113px;
 }
 
 .marketActionButton:hover {
@@ -295,69 +313,37 @@
 
 .previewCard {
   opacity: 0.8;
+  transition: transform 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.previewCard:hover {
+  transform: translateY(-8px);
+  z-index: 200;
+  opacity: 1;
 }
 
 /* RESPONSIVE */
-@media (max-width: 1400px) {
+@media (max-width: 768px) {
   .handPanel {
-    gap: 2rem;
-    padding: 1.25rem 1.5rem;
+    padding: 0.5rem 0.75rem;
+    gap: 1rem;
   }
 
   .cardsRow,
   .upgradesRow {
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
-}
 
-@media (max-width: 1200px) {
-  .handPanel {
-    flex-direction: column;
-    gap: 1.5rem;
+  .emptySlot {
+    width: 65px;
+    height: 92px;
   }
 
   .actionsSection {
     flex-direction: row;
     width: 100%;
     justify-content: center;
-  }
-
-  .closeMarketButton {
-    position: static;
-    align-self: center;
-    margin-top: 1rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .handPanel {
-    padding: 1rem;
-  }
-
-  .cardsRow,
-  .upgradesRow {
-    gap: 0.35rem;
-  }
-
-  .emptySlot {
-    width: 80px;
-    height: 115px;
-  }
-
-  .sectionTitle {
-    font-size: 0.875rem;
-  }
-
-  .token3,
-  .token1 {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
-  }
-
-  .actionButton,
-  .secondaryButton {
-    font-size: 0.75rem;
-    padding: 0.5rem 1rem;
   }
 }

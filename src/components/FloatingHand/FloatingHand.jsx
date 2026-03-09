@@ -18,6 +18,7 @@ export const FloatingHand = forwardRef(function FloatingHand({
   onSkipPhase,
   onEndTurn,
   marketDrawCards = [],
+  animatingCardIds = [],
 }, ref) {
   const cardRefs = useRef({});
 
@@ -212,7 +213,7 @@ export const FloatingHand = forwardRef(function FloatingHand({
           <h3 className={styles.sectionTitle}>YOUR HAND</h3>
           <div className={styles.cardsRow}>
             {player.hand.map((card, index) => (
-              <div key={`${card.id}-${index}`} className={styles.cardWrapper} ref={el => { cardRefs.current[card.id] = el; }}>
+              <div key={`${card.id}-${index}`} className={`${styles.cardWrapper} ${animatingCardIds.includes(card.id) ? styles.cardHidden : ''}`} ref={el => { cardRefs.current[card.id] = el; }}>
                 <Card
                   card={card}
                   onClick={onCardClick}

@@ -585,6 +585,7 @@ function GameContent() {
         onSkipPhase={handleSkipPhase}
         onEndTurn={handleEndTurn}
         marketDrawCards={marketDrawCards}
+        animatingCardIds={animatingCards ? animatingCards.map(a => a.card.id) : []}
       />
       {animatingCards && (
         <CardPlayAnimation animatingCards={animatingCards} />
