@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Card } from '../Card/Card';
 import { PLAYER_COLORS } from '../GameBoard/GameBoard';
 import styles from './FloatingHand.module.css';
@@ -31,24 +31,7 @@ export const FloatingHand = forwardRef(function FloatingHand({
     },
   }));
 
-  const [visible, setVisible] = useState(true);
-  const lastScrollY = useRef(window.scrollY);
   const [marketDrawRevealed, setMarketDrawRevealed] = useState(false);
-  const [showHandInMarket, setShowHandInMarket] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const current = window.scrollY;
-      if (current < lastScrollY.current) {
-        setVisible(true);  // scrolling up
-      } else if (current > lastScrollY.current) {
-        setVisible(false); // scrolling down
-      }
-      lastScrollY.current = current;
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   if (!isCurrentPlayer) return null;
 
@@ -83,7 +66,7 @@ export const FloatingHand = forwardRef(function FloatingHand({
   // MARKET VIEW (Buy Phase)
   if (turnPhase === 'buy') {
     return (
-      <div className={`${styles.container} ${visible ? '' : styles.hidden}`}>
+      <div className={styles.container}>
         <div className={styles.handPanel} style={{ borderColor: playerColor }}>
           {/* Left side - Upgrades */}
           <div className={styles.marketSection}>
@@ -104,7 +87,7 @@ export const FloatingHand = forwardRef(function FloatingHand({
                       card={upgrade}
                       onClick={() => canBuy && handleBuyUpgrade(upgrade)}
                       isDisabled={!canBuy}
-                      size="normal"
+                      size="small"
                     />
                   </div>
                 );
@@ -131,12 +114,6 @@ export const FloatingHand = forwardRef(function FloatingHand({
                     <button className={styles.marketActionButton} onClick={handleSkipMarket}>
                       SKIP
                     </button>
-                    <button
-                      className={styles.marketActionButton}
-                      onClick={() => setShowHandInMarket(!showHandInMarket)}
-                    >
-                      {showHandInMarket ? 'HIDE HAND' : 'SHOW HAND'}
-                    </button>
                   </div>
                 </>
               ) : (
@@ -149,26 +126,13 @@ export const FloatingHand = forwardRef(function FloatingHand({
                       onClick={() => handleSelectMarketCard(card)}
                       title={`Pick ${card.name}`}
                     >
-                      <Card card={card} size="normal" />
+                      <Card card={card} size="small" />
                     </div>
                   ))}
                 </>
               )}
             </div>
 
-            {/* Show hand if requested */}
-            {showHandInMarket && (
-              <div className={styles.handPreview}>
-                <h4 className={styles.previewTitle}>Your Hand</h4>
-                <div className={styles.previewCards}>
-                  {player.hand.map((card, index) => (
-                    <div key={`preview-${card.id}-${index}`} className={styles.previewCard}>
-                      <Card card={card} size="small" isDisabled={true} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right side - Patience display */}
@@ -206,7 +170,7 @@ export const FloatingHand = forwardRef(function FloatingHand({
 
   // PLAYER HAND VIEW (Play, Discard, Draw phases)
   return (
-    <div className={`${styles.container} ${visible ? '' : styles.hidden}`}>
+    <div className={styles.container}>
       <div className={styles.handPanel} style={{ borderColor: playerColor }}>
         {/* Left side - YOUR HAND */}
         <div className={styles.handSection}>
@@ -218,7 +182,7 @@ export const FloatingHand = forwardRef(function FloatingHand({
                   card={card}
                   onClick={onCardClick}
                   isSelected={selectedCards.some(sc => sc.id === card.id)}
-                  size="normal"
+                  size="small"
                 />
               </div>
             ))}
@@ -298,6 +262,20 @@ export const FloatingHand = forwardRef(function FloatingHand({
             TOTAL: {player.patience}
           </div>
         </div>
+
+        {/* Far right - UPGRADES OWNED */}
+        {player.upgrades && player.upgrades.length > 0 && (
+          <div className={styles.ownedUpgradesSection}>
+            <h3 className={styles.sectionTitle}>UPGRADES</h3>
+            <div className={styles.ownedUpgradesRow}>
+              {player.upgrades.map((upgrade) => (
+                <div key={upgrade.id} className={styles.ownedUpgradeWrapper}>
+                  <Card card={upgrade} size="small" isDisabled={true} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

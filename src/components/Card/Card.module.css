@@ -1,48 +1,269 @@
+/* ─────────────────────────────────────────────────────────────
+   Card.module.css
+   Fully code-based card rendering. All internal measurements
+   use calc(var(--s) * FigmaFullSizeValue) so any size change
+   is a single --s override. Full-size reference: 180×252 px.
+   ───────────────────────────────────────────────────────────── */
+
+/* ─── Base ─── */
 .card {
+  --s: 0.333;         /* default = small */
+  --hover-scale: 3;
   position: relative;
-  border-radius: 0.5rem;
-  overflow: hidden;
+  overflow: visible;  /* allow hover zoom to escape */
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   user-select: none;
   -webkit-user-select: none;
-  border: 2px solid #1a1a1a;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  /* Dark theme (basic / market) — default */
+  background: #202020;
+  border: calc(var(--s) * 2px) solid #FFD900;
 }
 
-.card.normal {
-  width: 120px;
+/* clip only the card face, not the hover zoom */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-.card.small {
-  width: 80px;
-}
+/* ─── Sizes ─── */
+.card.tiny   { --s: 0.25;  --hover-scale: 4;   width: 45px;  height: 63px;  }
+.card.small  { --s: 0.333; --hover-scale: 3;   width: 60px;  height: 84px;  }
+.card.normal { --s: 0.5;   --hover-scale: 2;   width: 90px;  height: 126px; }
+.card.large  { --s: 0.833; --hover-scale: 1.2; width: 150px; height: 210px; }
 
-.card.large {
-  width: 160px;
-}
+/* ─── Themes ─── */
+.theme-event     { background: #FFD900; border-color: #000; }
+.theme-annoyance { background: #ff0000; border-color: #fff; }
+.theme-upgrade   { background: #0044ff; border-color: #fff; }
 
+/* ─── Hover state — lift only, blurb shows via .hoverBubble ─── */
 .card:hover:not(.disabled) {
-  transform: translateY(-4px);
-  box-shadow:
-    0 4px 16px rgba(255, 215, 0, 0.5),
-    0 2px 8px rgba(0, 0, 0, 0.3);
-  border-color: #FFD700;
+  transform: translateY(-5px);
+  z-index: 100;
 }
 
+/* ─── Hover bubble (speech bubble tooltip) ─── */
+.hoverBubble {
+  position: absolute;
+  bottom: calc(100% + 13px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 155px;
+  background: #202020;
+  border: 1.667px solid #FFD900;
+  border-radius: 10px;
+  padding: 12.5px 15px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 200;
+  white-space: normal;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* Arrow pointing down — yellow border layer (behind) */
+.hoverBubble::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 11px solid transparent;
+  border-top-color: #FFD900;
+}
+
+/* Arrow pointing down — dark fill layer (in front, offset 2px up) */
+.hoverBubble::after {
+  content: '';
+  position: absolute;
+  top: calc(100% - 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  border-top-color: #202020;
+}
+
+.card:hover:not(.disabled) .hoverBubble {
+  opacity: 1;
+}
+
+.bubbleTitle {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+
+.bubbleDesc {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: normal;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ─── Selected ─── */
 .card.selected {
   transform: translateY(-8px) scale(1.05);
-  box-shadow:
-    0 0 25px rgba(255, 215, 0, 0.8),
-    0 6px 20px rgba(0, 0, 0, 0.4);
-  border: 3px solid #FFD700;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
+/* ─── Disabled ─── */
 .card.disabled {
   opacity: 0.5;
   cursor: not-allowed;
   filter: grayscale(50%);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Internal elements — all sizes via calc(var(--s) * fullPx)
+   Full-size Figma reference (180×252 px):
+     circle:     21 × 21 px  at (25, 13)
+     typeText:   15 px
+     name:       12 px, right=24, top=13, max-w=108
+     imageBox:   129.6 × 108 px at (25, 53), border=5
+     illustration: 80 px max
+     desc:       11 px, left=25, top=169, w=130
+     sectionBar: 89 × 15.25 px at (46, 220), text=8
+   ───────────────────────────────────────────────────────────── */
+
+/* ─── Type circle ─── */
+.typeCircle {
+  position: absolute;
+  left:   calc(var(--s) * 25px);
+  top:    calc(var(--s) * 13px);
+  width:  calc(var(--s) * 21px);
+  height: calc(var(--s) * 21px);
+  border-radius: 50%;
+  background: #FFD900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+.theme-event     .typeCircle { background: #000; }
+.theme-annoyance .typeCircle { background: #fff; }
+.theme-upgrade   .typeCircle { background: #fff; }
+
+.typeInitial {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: calc(var(--s) * 15px);
+  color: #000;
+  line-height: 1;
+}
+.theme-event     .typeInitial { color: #FFD900; }
+.theme-annoyance .typeInitial { color: #ff0000; }
+.theme-upgrade   .typeInitial { color: #0044ff; }
+
+/* ─── Card name ─── */
+.cardName {
+  position: absolute;
+  right:     calc(var(--s) * 24px);
+  top:       calc(var(--s) * 13px);
+  max-width: calc(var(--s) * 108px);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: calc(var(--s) * 12px);
+  color: #FFD900;
+  text-align: right;
+  line-height: 1.25;
+  z-index: 2;
+}
+.theme-event     .cardName { color: #000; }
+.theme-annoyance .cardName { color: #fff; }
+.theme-upgrade   .cardName { color: #fff; }
+
+/* ─── Image box ─── */
+.cardImageBox {
+  position: absolute;
+  left:   calc(var(--s) * 25px);
+  top:    calc(var(--s) * 53px);
+  width:  calc(var(--s) * 129.6px);
+  height: calc(var(--s) * 108px);
+  background: #fff;
+  border: calc(var(--s) * 5px) solid #FFD900;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.theme-event     .cardImageBox { border-color: #000; }
+.theme-annoyance .cardImageBox { border-color: #fff; }
+.theme-upgrade   .cardImageBox { border-color: #fff; }
+
+.cardIllustration {
+  max-width:  calc(var(--s) * 80px);
+  max-height: calc(var(--s) * 80px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* ─── Description ─── */
+.cardDesc {
+  position: absolute;
+  left:  calc(var(--s) * 25px);
+  top:   calc(var(--s) * 169px);
+  width: calc(var(--s) * 130px);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: calc(var(--s) * 11px);
+  color: #fff;
+  line-height: 1.3;
+  margin: 0;
+  overflow: hidden;
+}
+.theme-event .cardDesc { color: #000; }
+/* annoyance + upgrade: white (default matches) */
+
+/* ─── Section bar ─── */
+.sectionBar {
+  position: absolute;
+  left:   calc(var(--s) * 46px);
+  top:    calc(var(--s) * 220px);
+  width:  calc(var(--s) * 89px);
+  height: calc(var(--s) * 15.25px);
+  background: #FFD900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.theme-event     .sectionBar { background: #000; }
+.theme-annoyance .sectionBar { background: #fff; }
+.theme-upgrade   .sectionBar { background: #f5f5f5; }
+
+.sectionLabel {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: calc(var(--s) * 8px);
+  color: #000;
+  white-space: nowrap;
+  line-height: 1;
+}
+.theme-event     .sectionLabel { color: #FFD900; }
+.theme-annoyance .sectionLabel { color: #ff0000; }
+.theme-upgrade   .sectionLabel { color: #0044ff; }
+
+/* ─────────────────────────────────────────────────────────────
+   CardBack — deck stack displays (still PNG-based)
+   ───────────────────────────────────────────────────────────── */
+.cardBack {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .cardImage {
@@ -50,5 +271,3 @@
   height: auto;
   display: block;
 }
-
-/* Removed cardName - cards have names on them already */

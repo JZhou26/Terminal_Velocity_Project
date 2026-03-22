@@ -30,10 +30,9 @@ const PIP_GRID_AREAS = {
   6: '"a . b" "c . d" "e . f"',
 };
 
-function DieFace({ faceClass, rollResult }) {
-  const displayValue = rollResult ?? 1;
-  const areas = PIP_GRID_AREAS[displayValue];
-  const pips = PIP_LAYOUTS[displayValue];
+function DieFace({ faceClass, faceNumber }) {
+  const areas = PIP_GRID_AREAS[faceNumber];
+  const pips = PIP_LAYOUTS[faceNumber];
 
   return (
     <div className={`${styles.face} ${faceClass}`}>
@@ -79,12 +78,12 @@ function SingleDie({ cardName, onRoll, rollResult }) {
           className={`${styles.cube} ${rolling ? styles.rolling : ''} ${!rolling ? faceClass : ''}`}
           onAnimationEnd={handleAnimationEnd}
         >
-          <DieFace faceClass={styles.faceFront}  rollResult={rollResult} />
-          <DieFace faceClass={styles.faceBack}   rollResult={rollResult} />
-          <DieFace faceClass={styles.faceLeft}   rollResult={rollResult} />
-          <DieFace faceClass={styles.faceRight}  rollResult={rollResult} />
-          <DieFace faceClass={styles.faceTop}    rollResult={rollResult} />
-          <DieFace faceClass={styles.faceBottom} rollResult={rollResult} />
+          <DieFace faceClass={styles.faceFront}  faceNumber={1} />
+          <DieFace faceClass={styles.faceBack}   faceNumber={6} />
+          <DieFace faceClass={styles.faceLeft}   faceNumber={3} />
+          <DieFace faceClass={styles.faceRight}  faceNumber={4} />
+          <DieFace faceClass={styles.faceTop}    faceNumber={5} />
+          <DieFace faceClass={styles.faceBottom} faceNumber={2} />
         </div>
       </div>
       <button
@@ -130,9 +129,8 @@ export function DiceRollModal({ diceCards, onConfirm }) {
           <div className={styles.resultText}>
             {diceCards.map(card => {
               const r = rolls[card.id];
-              if (card.name === 'Reckless Driver') return `Move +${r}, -1 patience`;
-              if (card.name === 'Annoying Traveler') return r <= 3 ? `-1 patience` : `+2 spaces`;
-              return `Rolled ${r}`;
+              if (card.name === 'Annoying Traveler') return `Target moves back ${r} spaces`;
+              return `Move +${r} spaces`;
             }).join(' · ')}
           </div>
         )}

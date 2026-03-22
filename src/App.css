@@ -1,27 +1,597 @@
-.game-container {
+/* ────────────────────────────────────────────────
+   Overall page layout  (matches Figma node 53:1615)
+   MacBook Pro 14" layout: ~1280 × 916px
+   All values taken directly from Figma absolute coords
+   ──────────────────────────────────────────────── */
+
+/* Root: fill viewport, fixed to MacBook Pro 14" dimensions */
+.game-layout {
   display: flex;
   flex-direction: column;
+  width: fill-available;
+  height: fill-available;
+  background: #000;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding-top: 25px;
+  padding-bottom: 30px;
+   /
+}
+
+/* ── Play area: board (left) + right column ── */
+/* Board: x=244, y=142, h=636. Right col: x=830, y=142 */
+.play-area {
+  display: flex;
+  flex-shrink: 0;
+  height: 636px;
+  gap: 0;
+  align-items: flex-start;
+}
+
+/* Left area: 244px black space + 576px board — Figma: board at x=244 */
+.board-area {
+  flex-shrink: 0;
+  width: 820px; /* 244px left + 576px board */
+  height: 636px;
+  display: flex;
+  align-items: flex-start;
+  padding-left: 244px;
+  box-sizing: border-box;
+}
+
+/* ── Right column: x=830, width=438, height=636px matching board */
+.right-column {
+  flex-shrink: 0;
+  width: 438px;
+  height: 636px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 0;
+  margin-left: 10px; /* 820 + 10 = 830px from left edge */
+  box-sizing: border-box;
+}
+
+/* Round indicator bar — Figma node 54:1829, h=39px, w=438px */
+.round-bar-wrapper {
+  flex-shrink: 0;
+  position: relative;
+  width: 438px;
+  height: 39px;
+  margin-top: 26px; /* y=168 - y=142 = 26px gap from right-column top */
+}
+
+/* Decorative pin bolts — sit above the bar corners */
+.round-bar-pin {
+  position: absolute;
+  width: 17px;
+  height: 26px;
+  top: -26px; /* sits above the bar */
+}
+.round-bar-pin--left  { left: 44px; }
+.round-bar-pin--right { left: 381px; }
+.round-bar-pin img { width: 100%; height: 100%; display: block; }
+
+/* The actual bar */
+.round-bar {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  border: 1.667px solid #FFD900;
+  border-radius: 3.333px;
+  display: flex;
   align-items: center;
-  padding: 1rem;
-  min-height: 100vh;
-  padding-bottom: 280px; /* Space for floating hand */
+  justify-content: space-between;
+  padding: 0 7px;
 }
 
-.game-container > * {
-  max-width: 1200px;
+.round-icon-box {
+  flex-shrink: 0;
+  width: 25px;
+  height: 25px;
+  background: #FFD900;
+  border-radius: 1.667px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.round-icon-box img {
+  width: 15.83px;
+  height: 15.83px;
+  object-fit: contain;
+}
+
+.round-text {
+  flex: 1;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  font-style: normal;
+  color: #FFD900;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* ── Right content: players column (222.667px) + log/upgrades column (205.333px) ── */
+/* players: 4×131.333 + 3×8gap = 549.332px */
+/* log+upgrades: 366.667 + 8gap + 173 = 547.667px */
+/* margin-top: y=229 - (y=168+39) = 22px gap after round bar */
+.right-content {
+  display: flex;
+  flex-shrink: 0;
+  height: 549.332px;
+  margin-top: 22px;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* Left sub-col: 4 player panels stacked — Figma: 222.667px wide, 8px gaps */
+.players-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 222.667px;
+  flex-shrink: 0;
+}
+
+/* Right sub-col: game log (366.667px) + upgrades (173px) — Figma: 205.333px wide */
+.log-upgrades-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 205.333px;
+  flex-shrink: 0;
+}
+
+/* Upgrades panel — Figma 63:2223: 205.333×173px, bg #202020, radius 8.333px
+   Inner width: 205-26=179px. 3 cols × 45px + 2 gaps × 9px = 153px. */
+.upgrades-panel {
+  background: #202020;
+  border-radius: 8.333px;
+  width: 205.333px;
+  height: 173px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 10px 13px;
+  display: grid;
+  grid-template-columns: repeat(3, 45px);
+  grid-template-rows: auto auto auto;
+  column-gap: 9px;
+  row-gap: 7px;
+  align-content: start;
+}
+
+/* "UPGRADES" title — spans all 3 columns */
+.upgrades-title {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  line-height: normal;
+}
+
+/* Each slot: sized to tiny card (45×63px) */
+.upgrade-card-slot {
+  position: relative;
+  width: 45px;
+  height: 63px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border: 0.667px solid transparent;
+  transition: transform 0.12s, filter 0.12s;
+}
+
+/* Buyable: pointer + gold border + hover lift */
+.upgrade-buyable {
+  cursor: pointer;
+  border-color: rgba(255, 217, 0, 0.6);
+}
+.upgrade-card-slot:hover {
+  z-index: 200;
+}
+.upgrade-buyable:hover {
+  transform: translateY(-5px);
+}
+
+/* Already owned: green tint + checkmark badge */
+.upgrade-owned {
+  filter: brightness(0.55) saturate(0.4);
+  border-color: rgba(80, 220, 80, 0.5);
+}
+
+.upgrade-owned-badge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(80, 220, 80, 0.95);
+  pointer-events: none;
+}
+
+/* Can't afford: dimmed */
+.upgrade-unaffordable {
+  filter: brightness(0.45) saturate(0.3);
+  border-color: rgba(255, 217, 0, 0.2);
+  cursor: not-allowed;
+}
+
+/* Market was chosen this turn — softer dim, upgrades unavailable */
+.upgrade-market-blocked {
+  filter: brightness(0.62) saturate(0.45);
+  border-color: rgba(255, 217, 0, 0.15);
+  cursor: not-allowed;
+}
+
+/* ── Bottom row: hand + patience + market
+   Figma: y=785, height=131.333px
+   hand: x=244, w=576
+   patience: x=830, w=200.667
+   market: x=1041.67, w=227
+   gap from board bottom (y=778) to bottom-row (y=785) = 7px */
+.bottom-row {
+  position: relative;
+  z-index: 10000;
+  display: flex;
+  flex-shrink: 0;
+  height: 131.333px;
+  gap: 0;
+  margin-top: 7px;
+  align-items: stretch;
+}
+
+/* YOUR HAND — x=244, w=576, h=131.333px */
+.hand-panel {
+  position: relative;
+  flex-shrink: 0;
+  width: 576px;
+  height: 131.333px;
+  margin-left: 244px;
+  background: #000;
+  border: 1.667px solid #FFD900;
+  border-radius: 8.333px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Header row: label + action buttons */
+.hand-panel-header {
+  position: absolute;
+  top: 8px;
+  left: 35px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  z-index: 1;
+}
+.hand-panel-header .panel-label {
+  position: static;
+  flex-shrink: 0;
+}
+
+/* Phase action buttons */
+.hand-action-buttons {
+  display: flex;
+  gap: 6px;
+}
+.hand-action-btn {
+  background: #1a1a1a;
+  border: 1px solid #FFD900;
+  border-radius: 4px;
+  color: #FFD900;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 7px;
+  cursor: pointer;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+.hand-action-btn:hover:not(:disabled) {
+  background: #333;
+}
+.hand-action-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.hand-action-btn--primary {
+  background: #FFD900;
+  color: #000;
+}
+.hand-action-btn--primary:hover:not(:disabled) {
+  background: #ffe44d;
+}
+
+/* Selected card highlight */
+.hand-card-selected .hand-card-img {
+  outline: 2px solid #FFD900;
+  outline-offset: 2px;
+}
+.hand-card-selected {
+  transform: translateY(-8px);
+  z-index: 10;
+}
+
+/* YOUR PATIENCE — Figma 53:1672: x=830, w=200.667, h=131.333px */
+.patience-panel {
+  flex-shrink: 0;
+  width: 200.667px;
+  height: 131.333px;
+  margin-left: 10px;
+  border-radius: 8.333px;
+  padding: 12.34px 19px 10px 19px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: #202020;
+  box-sizing: border-box;
+}
+
+/* BUY MARKET CARD — Figma 55:1982: w=227, h=131.333px */
+/* Label at top=12.23px, card at top=41.03px, left=15.73px */
+.market-panel {
+  position: relative;
+  flex-shrink: 0;
+  width: 227px;
+  height: 131.333px;
+  margin-left: 10px;
+  background: #202020;
+  border-radius: 8.333px;
+  box-sizing: border-box;
+}
+
+/* Label — absolute, matches Figma top=12.23px, left=16.33px */
+.market-panel > .panel-label {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  right: 16px;
+}
+
+/* Single card back — absolute, matches Figma top=41.03px, left=15.73px */
+.market-card-img {
+  position: absolute;
+  top: 41px;
+  left: 16px;
+  width: 51.89px;
+  height: 72.645px;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s;
+}
+.market-card-img:hover {
+  transform: translateY(-5px);
+}
+
+/* Drawn cards — same y as the card back, side by side */
+.market-drawn-cards {
+  position: absolute;
+  top: 41px;
+  left: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.market-card-wrap {
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.market-card-wrap:hover {
+  transform: translateY(-5px);
+  z-index: 100;
+}
+
+.market-drawn-card {
+  width: 51.89px;
+  height: 72.645px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Override bubble width for market cards (wider for card name + desc) */
+.market-card-bubble {
+  width: 180px;
+}
+.market-card-wrap:hover .hand-card-bubble {
+  opacity: 1;
+}
+.market-bubble-name {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.market-bubble-desc {
+  font-weight: normal;
+  opacity: 0.85;
+}
+
+/* Upgrade was bought this turn — market card unavailable */
+.market-card-img.market-card-blocked {
+  filter: brightness(0.4) saturate(0.2);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Cancel button — small X in the market panel */
+.market-cancel-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+}
+.market-cancel-btn:hover {
+  color: #fff;
+}
+
+
+/* Shared panel label — 10px bold white */
+.panel-label {
+  margin: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  line-height: normal;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Hand card display — absolute positioned to match Figma (cards at x=37, y=30.33) */
+.hand-cards {
+  position: absolute;
+  left: 37px;
+  top: 30.33px;
+  display: flex;
+  gap: 13.67px;
+  align-items: flex-start;
+}
+
+.hand-empty-slot {
+  flex-shrink: 0;
+  width: 60px;
+  height: 84px;
+  background: #202020;
+  border: 0.667px solid rgba(255, 217, 0, 0.5);
+}
+
+/* ── Hand card (flat PNG display) ── */
+.hand-card-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 60px;
+  height: 84px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.hand-card-wrap:hover {
+  transform: translateY(-5px);
+  z-index: 100;
+}
+
+.hand-card-img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-@media (max-width: 1200px) {
-  .game-container {
-    padding: 1rem;
-    padding-bottom: 250px;
-  }
+/* Hover speech bubble */
+.hand-card-bubble {
+  position: absolute;
+  bottom: calc(100% + 13px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 155px;
+  background: #202020;
+  border: 1.667px solid #FFD900;
+  border-radius: 10px;
+  padding: 12.5px 15px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 200;
+  white-space: normal;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+.hand-card-bubble::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 11px solid transparent;
+  border-top-color: #FFD900;
+}
+.hand-card-bubble::after {
+  content: '';
+  position: absolute;
+  top: calc(100% - 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  border-top-color: #202020;
+}
+.hand-card-wrap:hover .hand-card-bubble {
+  opacity: 1;
+}
+.hand-card-bubble-text {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: #fff;
+  margin: 0;
+  line-height: 1.5;
 }
 
-@media (max-width: 768px) {
-  .game-container {
-    padding: 0.5rem;
-    padding-bottom: 200px;
-  }
+/* Patience tokens */
+.patience-tokens {
+  display: flex;
+  flex-direction: column;
+  gap: 6.67px;
+  margin-top: 9px;
+  flex-shrink: 0;
 }
+
+.token-row {
+  display: flex;
+  gap: 3.33px;
+}
+
+/* Large "3" token: 16.667px gold circle */
+.token {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.token-3 {
+  width: 16.667px;
+  height: 16.667px;
+  background: #FFD700;
+  color: #202020;
+  font-size: 10px;
+}
+
+/* Small "1" token: 13.333px white circle */
+.token-1 {
+  width: 13.333px;
+  height: 13.333px;
+  background: #fff;
+  color: #202020;
+  font-size: 8.333px;
+}
+
+.patience-total {
+  margin: auto 0 0 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  line-height: normal;
+  flex-shrink: 0;
+}
+
+
+

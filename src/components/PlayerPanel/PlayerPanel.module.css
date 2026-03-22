@@ -1,0 +1,145 @@
+/* Panel: 222.667×131.333px — Figma node 63:2373 */
+.panel {
+  background: #202020;
+  border: 2px solid transparent;
+  border-radius: 8.333px;
+  width: 222.667px;
+  height: 131.333px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  overflow: visible;
+  position: relative;
+}
+
+/* Active player indicator (currently unused) */
+.active {
+}
+
+/* "PLAYER N" — absolute pos from Figma: left=22.67, top=12.34 */
+.playerName {
+  position: absolute;
+  left: 23px;
+  top: 12px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  color: #fff;
+  white-space: nowrap;
+  line-height: normal;
+}
+
+/* "OWNED UPGRADES" — absolute pos: left=99.34, top=12.34 */
+.upgradesTitle {
+  position: absolute;
+  left: 99px;
+  top: 12px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  color: #fff;
+  white-space: nowrap;
+  line-height: normal;
+}
+
+/* Avatar box — border color set per-player via inline style */
+.avatar {
+  position: absolute;
+  left: 25px;
+  top: 42px;
+  width: 33px;
+  height: 33px;
+  background: #d0d0d0;
+  border: 3.333px solid;
+  border-radius: 1px;
+  overflow: hidden;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.avatarImg {
+  width: 27px;
+  height: 27px;
+  object-fit: contain;
+}
+
+.avatarImgComposite {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* POSITION: X — left=22.67, top=93.34 */
+.positionLine {
+  position: absolute;
+  left: 23px;
+  top: 93px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  color: #fff;
+  white-space: nowrap;
+  line-height: normal;
+}
+
+/* SECTION: AIRPLANE — left=22.67, top=109.34 */
+.sectionLine {
+  position: absolute;
+  left: 23px;
+  top: 109px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  color: #fff;
+  white-space: nowrap;
+  line-height: normal;
+}
+
+/* Upgrade slots row — Figma: left=99, top=25, cards are 50×70px each */
+.upgradeSlots {
+  position: absolute;
+  left: 99px;
+  top: 35px;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+/* Wrapper for tiny card (45×63) */
+.upgradeCardWrap {
+  width: 45px;
+  height: 63px;
+  overflow: visible; /* allow tooltip bubble to escape */
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Empty upgrade slot — same 50×70px footprint */
+.upgradeSlot {
+  width: 50px;
+  height: 70px;
+  background: #202020;
+  border: 0.667px solid rgba(255, 217, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+/* "NONE" — 8px bold white, centered in slot */
+.noneText {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  line-height: normal;
+  letter-spacing: 0.5px;
+}
+

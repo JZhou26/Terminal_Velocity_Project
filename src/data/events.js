@@ -1,133 +1,83 @@
-// Event cards (8 total) - Drawn at end of round if leader not in Airplane section
+// Event cards — 8 total
+// Yellow background, dark border, "EVENT" section bar
 
 export const eventCards = [
+  // Travel Delays ×3
   {
-    id: 'road-construction',
-    name: 'Road Construction',
+    id: 'travel-delays-1',
+    name: 'Travel Delays',
     type: 'event',
-    section: 'drive',
-    imagePath: '/assets/cards/RoadConstruction.png',
-    description: 'All players in Drive section lose 2 patience',
-    effect: (player) => {
-      const section = player.position <= 12 ? 'drive' : player.position <= 24 ? 'security' : 'airplane';
-      if (section === 'drive') {
-        return { patienceLoss: 2 };
-      }
-      return null;
-    },
+    imagePath: '/assets/cards/TravelDelays.png',
+    description: 'All players in your section, including yourself, move back 3 spaces.',
+    effect: () => ({ moveBack: 3 }),
   },
   {
-    id: 'traffic-jam',
-    name: 'Traffic Jam',
+    id: 'travel-delays-2',
+    name: 'Travel Delays',
     type: 'event',
-    section: 'drive',
-    imagePath: '/assets/cards/TrafficJam.png',
-    description: 'All players in Drive section move back 2 spaces',
-    effect: (player) => {
-      const section = player.position <= 12 ? 'drive' : player.position <= 24 ? 'security' : 'airplane';
-      if (section === 'drive') {
-        return { moveBack: 2 };
-      }
-      return null;
-    },
+    imagePath: '/assets/cards/TravelDelays.png',
+    description: 'All players in your section, including yourself, move back 3 spaces.',
+    effect: () => ({ moveBack: 3 }),
   },
   {
-    id: 'coordination-conflict',
+    id: 'travel-delays-3',
+    name: 'Travel Delays',
+    type: 'event',
+    imagePath: '/assets/cards/TravelDelays.png',
+    description: 'All players in your section, including yourself, move back 3 spaces.',
+    effect: () => ({ moveBack: 3 }),
+  },
+  // Migraine ×1
+  {
+    id: 'migraine-1',
+    name: 'Migraine',
+    type: 'event',
+    imagePath: '/assets/cards/Migraine.png',
+    description: 'All players lose one patience.',
+    effect: () => ({ patienceLoss: 1 }),
+    affectsAll: true,
+  },
+  // Lost Luggage ×1
+  {
+    id: 'lost-luggage-1',
+    name: 'Lost Luggage',
+    type: 'event',
+    imagePath: '/assets/cards/LostLuggage.png',
+    description: 'All players in your section, including yourself, must discard all section specific cards of the section you are in. Then redraw up to six cards at the end of their next turn.',
+    effect: () => ({ discardSectionCards: true }),
+  },
+  // Coordination Conflict ×3
+  {
+    id: 'coordination-conflict-1',
     name: 'Coordination Conflict',
     type: 'event',
-    section: 'drive',
     imagePath: '/assets/cards/CoordConflict.png',
-    description: 'All players in Drive vote: majority loses 1 patience, minority gains 1 patience',
-    effect: (player, voteResults) => {
-      const section = player.position <= 12 ? 'drive' : player.position <= 24 ? 'security' : 'airplane';
-      if (section === 'drive') {
-        return { requiresVote: true, voteResults };
-      }
-      return null;
-    },
+    description: 'All players vote. Player with most votes must roll a dice and will choose to lose half of the dice roll in either Patience or Movement (Rounding up). In the event of a tie, player further forward is chosen.',
+    effect: () => ({ patienceLoss: 1 }),
     requiresVoting: true,
   },
   {
-    id: 'long-security-line',
-    name: 'Long Security Line',
+    id: 'coordination-conflict-2',
+    name: 'Coordination Conflict',
     type: 'event',
-    section: 'security',
-    imagePath: '/assets/cards/LongSecurityLine.png',
-    description: 'All players in Security section lose 2 patience',
-    effect: (player) => {
-      const section = player.position <= 12 ? 'drive' : player.position <= 24 ? 'security' : 'airplane';
-      if (section === 'security') {
-        return { patienceLoss: 2 };
-      }
-      return null;
-    },
-  },
-  {
-    id: 'random-search',
-    name: 'Random Search',
-    type: 'event',
-    section: 'security',
-    imagePath: '/assets/cards/RandomSearch.png',
-    description: 'All players in Security section move back 2 spaces',
-    effect: (player) => {
-      const section = player.position <= 12 ? 'drive' : player.position <= 24 ? 'security' : 'airplane';
-      if (section === 'security') {
-        return { moveBack: 2 };
-      }
-      return null;
-    },
-  },
-  {
-    id: 'coordination-conflight',
-    name: 'Coordination Conflight',
-    type: 'event',
-    section: 'security',
-    imagePath: '/assets/cards/CoordConflight.png',
-    description: 'All players in Security vote: majority loses 1 patience, minority gains 1 patience',
-    effect: (player, voteResults) => {
-      const section = player.position <= 12 ? 'drive' : player.position <= 24 ? 'security' : 'airplane';
-      if (section === 'security') {
-        return { requiresVote: true, voteResults };
-      }
-      return null;
-    },
+    imagePath: '/assets/cards/CoordConflict.png',
+    description: 'All players vote. Player with most votes must roll a dice and will choose to lose half of the dice roll in either Patience or Movement (Rounding up). In the event of a tie, player further forward is chosen.',
+    effect: () => ({ patienceLoss: 1 }),
     requiresVoting: true,
   },
   {
-    id: 'gate-change',
-    name: 'Gate Change',
+    id: 'coordination-conflict-3',
+    name: 'Coordination Conflict',
     type: 'event',
-    section: 'airplane',
-    imagePath: '/assets/cards/GateChange.png',
-    description: 'All players in Airplane section lose 2 patience',
-    effect: (player) => {
-      const section = player.position <= 12 ? 'drive' : player.position <= 24 ? 'security' : 'airplane';
-      if (section === 'airplane') {
-        return { patienceLoss: 2 };
-      }
-      return null;
-    },
-  },
-  {
-    id: 'flight-delay',
-    name: 'Flight Delay',
-    type: 'event',
-    section: 'airplane',
-    imagePath: '/assets/cards/FlightDelay.png',
-    description: 'All players in Airplane section move back 2 spaces',
-    effect: (player) => {
-      const section = player.position <= 12 ? 'drive' : player.position <= 24 ? 'security' : 'airplane';
-      if (section === 'airplane') {
-        return { moveBack: 2 };
-      }
-      return null;
-    },
+    imagePath: '/assets/cards/CoordConflict.png',
+    description: 'All players vote. Player with most votes must roll a dice and will choose to lose half of the dice roll in either Patience or Movement (Rounding up). In the event of a tie, player further forward is chosen.',
+    effect: () => ({ patienceLoss: 1 }),
+    requiresVoting: true,
   },
 ];
 
 export function createEventDeck() {
   const deck = [...eventCards];
-  // Shuffle the deck
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [deck[i], deck[j]] = [deck[j], deck[i]];

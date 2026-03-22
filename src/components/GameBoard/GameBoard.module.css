@@ -1,89 +1,666 @@
-.container {
-  margin: 1rem 0;
+/* Board outer wrapper — exact Figma size: 576×636px */
+.outer {
+  flex-shrink: 0;
+  width: 576px;
+  height: 636px;
+  display: flex;
+  align-items: stretch;
 }
 
-.boardWrapper {
+/* The board — fixed Figma dimensions */
+.board {
   position: relative;
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto;
-  background: #1a1a1a;
-  border-radius: 0.5rem;
-  border: 4px solid #FFD700;
-  box-shadow:
-    0 0 30px rgba(255, 215, 0, 0.4),
-    0 4px 12px rgba(0, 0, 0, 0.3);
+  width: 576px;
+  height: 636px;
+  background: #000;
+  border: 1.667px solid #FFD900;
+  border-radius: 16.667px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
-.boardImage {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.playerTokens {
+/* ── Background image ── */
+.bgImage {
   position: absolute;
+  left: -116.32%;
+  top: -23.49%;
+  width: 103.30%;
+  height: 149.08%;
+  transform: rotate(-90deg);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0.20;
+}
+.bgImageInner {
+  position: absolute;
+  left: 9.2%;
   top: 0;
-  left: 0;
-  width: 100%;
+  width: 84.7%;
   height: 100%;
+  object-fit: cover;
+}
+
+/* ── Top planes banner — Figma: left=50.67, top=-90, w=482.622, h=270.5 ── */
+.planesTop {
+  position: absolute;
+  left: 50.67px;
+  top: -90px;
+  width: 482.622px;
+  height: 270.5px;
+  object-fit: cover;
   pointer-events: none;
 }
 
+/* ── Road decor — Figma: left=-17.67, top=361, w=339.333, h=227.206 ── */
+.roadDecor {
+  position: absolute;
+  left: -17.67px;
+  top: 361px;
+  width: 339.333px;
+  height: 227.206px;
+  object-fit: fill;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 0;
+}
+
+/* ── Security track — inline SVG, Figma: left=152, top=49, w=292.5, h=179.5 ── */
+.securityTrack {
+  position: absolute;
+  left: 152px;
+  top: 49px;
+  width: 292.5px;
+  height: 179.5px;
+  pointer-events: none;
+  z-index: 8;
+  overflow: visible;
+}
+
+/* ── Arch outer shell — Figma: left=151.75, top=49.33, w=291.25, h=177.667 ── */
+.archOuter {
+  position: absolute;
+  left: 151.75px;
+  top: 49.33px;
+  width: 291.25px;
+  height: 177.667px;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Arch frame ornament — Figma: left=154.44, top=50.16, w=288.637, h=170.836 ── */
+.archFrameOrn {
+  position: absolute;
+  left: 154.44px;
+  top: 50.16px;
+  width: 288.637px;
+  height: 170.836px;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── Center window scene — Figma: left=255.33, top=148.67, w=87, h=123.333 ── */
+.centerWindow {
+  position: absolute;
+  left: 255.33px;
+  top: 148.67px;
+  width: 87px;
+  height: 123.333px;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── Arch inner — Figma: left=223.67, top=119.17, w=147.937, h=107.667 ── */
+.archInner {
+  position: absolute;
+  left: 223.67px;
+  top: 119.17px;
+  width: 147.937px;
+  height: 107.667px;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ── Drive track image — Figma: left=148, top=222.33, w=83.5, h=354 ── */
+.driveTrackImg {
+  position: absolute;
+  left: 148px;
+  top: 222.33px;
+  width: 83.5px;
+  height: 354px;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Slots layer — highest within the board, but below any external overlays/modals ── */
+.slotsLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ── Drive slot — w=74.667, h=30.667, left set inline ── */
+.driveSlot {
+  position: absolute;
+  width: 74.667px;
+  height: 30.667px;
+  background: rgba(15, 186, 0, 0.1);
+  border: 1.667px solid rgba(15, 186, 0, 0.5);
+  border-radius: 3.333px;
+}
+
+/* ── Airplane track image — Figma: left=366.33, top=221.33, w=83.5, h=354 ── */
+.airplaneTrackImg {
+  position: absolute;
+  left: 366.33px;
+  top: 221.33px;
+  width: 83.5px;
+  height: 354px;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Airplane slot — w=74.667, h=30.667, left set inline ── */
+.airplaneSlot {
+  position: absolute;
+  width: 74.667px;
+  height: 30.667px;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1.667px solid rgba(255, 0, 0, 0.5);
+  border-radius: 3.333px;
+}
+
+
+/* ── Event card — w=59.667, h=84, border-radius=3.333 ── */
+.eventCard {
+  position: absolute;
+  width: 59.667px;
+  height: 84px;
+  border: 3.333px solid;
+  border-radius: 3.333px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* ── Annoyance card — same dims as event ── */
+.annoyanceCard {
+  position: absolute;
+  width: 59.667px;
+  height: 84px;
+  border: 3.333px solid;
+  border-radius: 3.333px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.cardLabel {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 8.333px;
+  font-weight: 900;
+  color: #eee;
+  text-align: center;
+  line-height: 1.3;
+  white-space: pre-line;
+}
+
+/* ── START / FINISH boxes — Figma: w=88, h=33, border-radius=3.333 ── */
+.startBox,
+.finishBox {
+  position: absolute;
+  top: 575.33px;
+  width: 88px;
+  height: 33px;
+  background: rgba(255, 217, 0, 0.1);
+  border: 1.667px solid #a18a08;
+  border-radius: 3.333px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+}
+.startBox  { left: 145.67px; }
+.finishBox { left: 362.67px; }
+
+.boxLabel {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 900;
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── Section labels — Figma pixel positions, centered via translateX(-50%) ── */
+.securityLabel,
+.driveLabel,
+.airplaneLabel {
+  position: absolute;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  color: #fff;
+  font-size: 10px;
+  white-space: nowrap;
+  z-index: 5;
+  letter-spacing: 1px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+/* SECURITY: left=188.83, top=204.67 */
+.securityLabel { left: 188.83px; top: 204.67px; }
+/* DRIVE: left=189.5, top=555.33 */
+.driveLabel    { left: 189.5px;  top: 555.33px; }
+/* AIRPLANE: left=407.33, top=234.67 */
+.airplaneLabel { left: 407.33px; top: 234.67px; }
+
+/* TERMINAL VELOCITY LOGO BADGE (node 45:1372) — all px on 576x636 board */
+
+/* Vector2 — outer badge shape
+   Figma: flex container left=221.85, top=262.58, w=150.198, h=107.355
+   Inner div: w=131.337, h=77.59, rotated. Inner img has inset bleed -2.15% -1.27% */
+.logoShape {
+  position: absolute;
+  left: 221.85px;
+  top: 262.58px;
+  width: 150.198px;
+  height: 107.355px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 4;
+}
+.logoShapeInner {
+  flex: none;
+  width: 131.337px;
+  height: 77.59px;
+  position: relative;
+  transform: rotate(-14.69deg) skewX(2.67deg);
+}
+.logoShapeImg {
+  position: absolute;
+  /* inset bleed: -2.15% top/bottom, -1.27% left/right */
+  top: calc(-2.15% );
+  left: calc(-1.27%);
+  width: calc(100% + 2 * 1.27%);
+  height: calc(100% + 2 * 2.15%);
+  display: block;
+  max-width: none;
+}
+
+/* Vector3 — inner plane icon
+   Figma: flex container left=269.2, top=284.44, w=61.087, h=69.588
+   Inner div: w=52.233, h=62.391, rotated -8.72deg. Img fills absolutely. */
+.logoPlane {
+  position: absolute;
+  left: 269.2px;
+  top: 284.44px;
+  width: 61.087px;
+  height: 69.588px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+}
+.logoPlaneInner {
+  flex: none;
+  width: 52.233px;
+  height: 62.391px;
+  position: relative;
+  transform: rotate(-8.72deg);
+}
+.logoPlaneImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+/* White decorative bars — each is a flex container that centers the actual bar
+   Figma: container left/top/w/h given, inner bar is flex-none rotated inside */
+
+/* Bar1 — container: left=280.8, top=342.67, w=48.834, h=13.596 */
+.logoBar1 {
+  position: absolute;
+  left: 280.8px;
+  top: 342.67px;
+  width: 48.834px;
+  height: 13.596px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 6;
+}
+.logoBar1::after {
+  content: '';
+  flex: none;
+  width: 50.204px;
+  height: 0.907px;
+  background: #fff;
+  transform: rotate(-14.69deg) skewX(2.67deg);
+}
+
+/* Bar2 — container: left=290.63, top=280.38, w=51.436, h=14.277 */
+.logoBar2 {
+  position: absolute;
+  left: 290.63px;
+  top: 280.38px;
+  width: 51.436px;
+  height: 14.277px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 6;
+}
+.logoBar2::after {
+  content: '';
+  flex: none;
+  width: 52.893px;
+  height: 0.907px;
+  background: #fff;
+  transform: rotate(-14.69deg) skewX(2.67deg);
+}
+
+/* Bar3 — container: left=243.96, top=283.49, w=54.037, h=14.959 */
+.logoBar3 {
+  position: absolute;
+  left: 243.96px;
+  top: 283.49px;
+  width: 54.037px;
+  height: 14.959px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 6;
+}
+.logoBar3::after {
+  content: '';
+  flex: none;
+  width: 55.583px;
+  height: 0.907px;
+  background: #fff;
+  transform: rotate(-14.69deg) skewX(2.67deg);
+}
+
+/* Bar4 — container: left=235.99, top=295.38, w=48.834, h=13.596 */
+.logoBar4 {
+  position: absolute;
+  left: 235.99px;
+  top: 295.38px;
+  width: 48.834px;
+  height: 13.596px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 6;
+}
+.logoBar4::after {
+  content: '';
+  flex: none;
+  width: 50.204px;
+  height: 0.907px;
+  background: #fff;
+  transform: rotate(-14.69deg) skewX(2.67deg);
+}
+
+/* TERMINAL VELOCITY text
+   Figma: flex container left=301.07 (with -translateX(50%)), top=288.93, w=128.442, h=79.786
+   actual left edge = 301.07 - 128.442/2 = 236.85
+   Badge center Y = 262.58 + 107.355/2 = 316.26 → top = 316.26 - 79.786/2 = 276.37 */
+.logoText {
+  position: absolute;
+  left: 236.85px;
+  top: 276.37px;
+  width: 128.442px;
+  height: 79.786px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 7;
+  margin: 0;
+  padding: 0;
+  /* The text itself is rotated inside */
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 15px;
+  color: #fff;
+  text-align: center;
+  line-height: 1.15;
+  white-space: nowrap;
+  transform: rotate(-14.69deg) skewX(2.67deg);
+}
+
+/* ── Decorative shadow boxes (arch base pillars) ── */
+/* Figma: pillarBoxDark1: left=185.33, top=198.33, w=35.667, h=21.667 */
+.pillarBoxDark1 {
+  position: absolute;
+  left: 185.33px; top: 198.33px;
+  width: 35.667px; height: 21.667px;
+  background: #303030;
+  pointer-events: none;
+  z-index: 4;
+}
+/* Figma: pillarBox1: left=183, top=194.33, w=35.667, h=21.667 */
+.pillarBox1 {
+  position: absolute;
+  left: 183px; top: 194.33px;
+  width: 35.667px; height: 21.667px;
+  background: #4b4b4b;
+  border: 1.667px solid #5b5b5b;
+  pointer-events: none;
+  z-index: 4;
+}
+/* Figma: pillarBoxDark2: left=380.33, top=198.33, w=35.667, h=21.667 */
+.pillarBoxDark2 {
+  position: absolute;
+  left: 380.33px; top: 198.33px;
+  width: 35.667px; height: 21.667px;
+  background: #303030;
+  pointer-events: none;
+  z-index: 4;
+}
+/* Figma: pillarBox2: left=378, top=194.33, w=35.667, h=21.667 */
+.pillarBox2 {
+  position: absolute;
+  left: 378px; top: 194.33px;
+  width: 35.667px; height: 21.667px;
+  background: #4b4b4b;
+  border: 1.667px solid #5b5b5b;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* ── Small decorative planes (arch top area) ── */
+/* vector31: left=222, top=103.67, w=31.5, h=30.667 */
+.deco31 { position: absolute; left: 222px; top: 103.67px; width: 31.5px; height: 30.667px; pointer-events: none; z-index: 2; }
+/* vector32: left=258.5, top=88.62, w=29.833, h=25.042 */
+.deco32 { position: absolute; left: 258.5px; top: 88.62px; width: 29.833px; height: 25.042px; pointer-events: none; z-index: 2; }
+/* vector33: left=307, top=89.65, w=27.333, h=23.015 */
+.deco33 { position: absolute; left: 307px; top: 89.65px; width: 27.333px; height: 23.015px; pointer-events: none; z-index: 2; }
+/* vector34: left=342.33, top=104.5, w=31.667, h=30.5 */
+.deco34 { position: absolute; left: 342.33px; top: 104.5px; width: 31.667px; height: 30.5px; pointer-events: none; z-index: 2; }
+/* vector35: left=369, top=140.83, w=28.002, h=30.333 */
+.deco35 { position: absolute; left: 369px; top: 140.83px; width: 28.002px; height: 30.333px; pointer-events: none; z-index: 2; }
+/* vector30: left=197.5, top=138.83, w=28.5, h=30.167 */
+.deco30 { position: absolute; left: 197.5px; top: 138.83px; width: 28.5px; height: 30.167px; pointer-events: none; z-index: 2; }
+
+/* ── Planes on drive track ── */
+/* group86: left=192.67, top=280.33, w=15.436, h=22.663, rotate 180 */
+.group86wrap {
+  position: absolute;
+  left: 192.67px; top: 280.33px;
+  width: 15.436px; height: 22.663px;
+  transform: rotate(180deg);
+  pointer-events: none; z-index: 3;
+}
+/* group85: left=201.67, top=337.33, w=15.436, h=22.663, rotate 180 */
+.group85wrap {
+  position: absolute;
+  left: 201.67px; top: 337.33px;
+  width: 15.436px; height: 22.663px;
+  transform: rotate(180deg);
+  pointer-events: none; z-index: 3;
+}
+/* group83: left=162.19, top=389.5, w=15.436, h=22.663 */
+.group83 {
+  position: absolute;
+  left: 162.19px; top: 389.5px;
+  width: 15.436px; height: 22.663px;
+  pointer-events: none; z-index: 3;
+}
+/* group84: left=160.67, top=465.33, w=15.436, h=22.663 */
+.group84 {
+  position: absolute;
+  left: 160.67px; top: 465.33px;
+  width: 15.436px; height: 22.663px;
+  pointer-events: none; z-index: 3;
+}
+/* group90: left=236.33, top=388.67, w=24.5, h=27.307, rotate -150.94deg */
+.group90wrap {
+  position: absolute;
+  left: 236.33px; top: 388.67px;
+  width: 24.5px; height: 27.307px;
+  transform: rotate(-150.94deg);
+  pointer-events: none; z-index: 3;
+}
+.groupPlane {
+  width: 100%; height: 100%; object-fit: contain;
+}
+
+/* ── Rotated planes (lower road area) ── */
+/* group89: left=62.33, top=522.33, w=23.783, h=17.134, rotate -94.41deg */
+.group89wrap {
+  position: absolute;
+  left: 62.33px; top: 522.33px;
+  width: 23.783px; height: 17.134px;
+  transform: rotate(-94.41deg);
+  pointer-events: none; z-index: 3;
+}
+/* group88: left=235.67, top=456, w=26.499, h=27.239, rotate 40.84deg */
+.group88wrap {
+  position: absolute;
+  left: 235.67px; top: 456px;
+  width: 26.499px; height: 27.239px;
+  transform: rotate(40.84deg);
+  pointer-events: none; z-index: 3;
+}
+/* group87: left=111.33, top=545.67, w=26.076, h=21.158, rotate 73.76deg */
+.group87wrap {
+  position: absolute;
+  left: 111.33px; top: 545.67px;
+  width: 26.076px; height: 21.158px;
+  transform: rotate(73.76deg);
+  pointer-events: none; z-index: 3;
+}
+
+/* ── Large rotated plane decorations ── */
+/* vector15: left=486.67, top=470.33, w=103.875, h=103.454, rotate -37.42deg */
+.vector15wrap {
+  position: absolute;
+  left: 486.67px; top: 470.33px;
+  width: 103.875px; height: 103.454px;
+  transform: rotate(-37.42deg);
+  pointer-events: none; z-index: 2;
+}
+/* vector36: left=461, top=604, w=90.752, h=89.121, rotate 14.32deg */
+.vector36wrap {
+  position: absolute;
+  left: 461px; top: 604px;
+  width: 90.752px; height: 89.121px;
+  transform: rotate(14.32deg);
+  pointer-events: none; z-index: 2;
+}
+.largeDecoPlaneFull {
+  width: 100%; height: 100%; object-fit: contain;
+}
+
+/* ── Road dashes — Figma exact positions ── */
+/* dash1: left=31, top=550.67, w=15.333, h=1.333 */
+.roadDash1 { position: absolute; left: 31px; top: 550.67px; width: 15.333px; height: 1.333px; background: rgba(217,217,217,0.3); pointer-events: none; }
+/* dash2: left=58.97, top=548.66, rotate -5.08deg */
+.roadDash2 { position: absolute; left: 58.97px; top: 548.66px; width: 15.391px; height: 2.687px; background: rgba(217,217,217,0.3); transform: rotate(-5.08deg); pointer-events: none; }
+/* dash3: left=86, top=543, rotate -12.34deg */
+.roadDash3 { position: absolute; left: 86px; top: 543px; width: 15.264px; height: 4.578px; background: rgba(217,217,217,0.3); transform: rotate(-12.34deg); pointer-events: none; }
+/* dash4: left=113.67, top=534.67, rotate -19.06deg */
+.roadDash4 { position: absolute; left: 113.67px; top: 534.67px; width: 14.928px; height: 6.268px; background: rgba(217,217,217,0.3); transform: rotate(-19.06deg); pointer-events: none; }
+/* dash5: left=244.67, top=427.67, rotate -59.68deg */
+.roadDash5 { position: absolute; left: 244.67px; top: 427.67px; width: 8.891px; height: 13.91px; background: rgba(217,217,217,0.3); transform: rotate(-59.68deg); pointer-events: none; }
+/* dash6: left=257.31, top=404.71, rotate -65.39deg */
+.roadDash6 { position: absolute; left: 257.31px; top: 404.71px; width: 7.598px; height: 14.496px; background: rgba(217,217,217,0.3); transform: rotate(-65.39deg); pointer-events: none; }
+/* dash7: left=267.99, top=377.37, rotate -73.59deg */
+.roadDash7 { position: absolute; left: 267.99px; top: 377.37px; width: 5.61px; height: 15.086px; background: rgba(217,217,217,0.3); transform: rotate(-73.59deg); pointer-events: none; }
+
+/* ── Player tokens layer — above slotsLayer, but below external overlays/modals ── */
+.playerTokens {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 11;
+}
 .playerToken {
   position: absolute;
-  width: 40px;
-  height: auto;
+  width: 5%;
+  aspect-ratio: 1;
   transform: translate(-50%, -50%);
   pointer-events: all;
   cursor: help;
-  z-index: 10;
-  transition: all 0.3s;
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  filter: drop-shadow(0 0 4px rgba(255,215,0,0.9));
+  transition: all 0.4s ease;
 }
-
 .playerToken:hover {
-  transform: translate(-50%, -50%) scale(1.3);
-  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9));
+  transform: translate(-50%, -50%) scale(1.5);
+  filter: drop-shadow(0 0 8px rgba(255,215,0,1));
 }
 
-.legend {
+/* ── Board tile card content (when a card has been drawn into a slot) ── */
+.boardCardContent {
   display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-.legendItem {
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  background: rgba(45, 45, 45, 0.8);
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  border: 2px solid #FFD700;
-  font-weight: 700;
-  color: #FFD700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  padding: 3px 2px 2px;
+  box-sizing: border-box;
+  gap: 2px;
+  overflow: hidden;
 }
 
-.legendPlane {
-  width: 24px;
-  height: auto;
-  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+.boardCardImg {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  object-fit: cover;
+  display: block;
 }
 
-.eliminated {
-  text-decoration: line-through;
-  opacity: 0.5;
-  border-color: #666;
-  color: #888;
-}
-
-.eliminated .legendPlane {
-  opacity: 0.5;
-  filter: grayscale(100%);
+.boardCardName {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 5.5px;
+  font-weight: 900;
+  color: #eee;
+  text-align: center;
+  line-height: 1.2;
+  white-space: normal;
+  word-break: break-word;
+  flex-shrink: 0;
 }

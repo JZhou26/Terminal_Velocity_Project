@@ -3,7 +3,7 @@ import { eventCards } from '../data/events';
 import { annoyanceCards } from '../data/annoyances';
 import { shuffle, drawCards } from './deckManager';
 
-export function initializeGame(playerNames) {
+export function initializeGame(playerNames, botIndices = []) {
   // Create and shuffle decks
   const basicDrawPile = shuffle(basicCards);
   const marketDrawPile = shuffle(marketCards);
@@ -18,6 +18,7 @@ export function initializeGame(playerNames) {
     patience: 10,
     hand: [],
     upgrades: [],
+    isBot: botIndices.includes(index),
     isEliminated: false,
     cardsPlayedThisTurn: 0,
   }));

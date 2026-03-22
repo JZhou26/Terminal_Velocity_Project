@@ -77,12 +77,14 @@
 }
 
 /* Show face 1 by default */
-.cube.face1 { transform: rotateX(0deg) rotateY(0deg); }
-.cube.face2 { transform: rotateX(-90deg) rotateY(0deg); }
-.cube.face3 { transform: rotateX(0deg) rotateY(90deg); }
-.cube.face4 { transform: rotateX(0deg) rotateY(-90deg); }
-.cube.face5 { transform: rotateX(90deg) rotateY(0deg); }
-.cube.face6 { transform: rotateX(180deg) rotateY(0deg); }
+/* Face assignments: Front=1, Back=6, Left=3, Right=4, Top=5, Bottom=2 */
+/* To show face N, rotate so that face's physical side faces the viewer */
+.cube.face1 { transform: rotateX(0deg)    rotateY(0deg);   } /* Front */
+.cube.face2 { transform: rotateX(-90deg)  rotateY(0deg);   } /* Bottom */
+.cube.face3 { transform: rotateX(0deg)    rotateY(-90deg); } /* Left */
+.cube.face4 { transform: rotateX(0deg)    rotateY(90deg);  } /* Right */
+.cube.face5 { transform: rotateX(90deg)   rotateY(0deg);   } /* Top */
+.cube.face6 { transform: rotateX(180deg)  rotateY(0deg);   } /* Back */
 
 @keyframes diceRoll {
   0%   { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }

@@ -12,6 +12,11 @@
   --accent-yellow: #FFEB3B;
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   font-family: 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
@@ -22,7 +27,7 @@ body {
 }
 
 #root {
-  min-height: 100vh;
+  height: 100%;
 }
 
 button {

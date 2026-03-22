@@ -3,13 +3,15 @@ import { GameProvider, useGame } from './context/GameContext';
 import { StartScreen } from './components/StartScreen/StartScreen';
 import { GameBoard } from './components/GameBoard/GameBoard';
 import { GameStatus } from './components/GameStatus/GameStatus';
-import { FloatingHand } from './components/FloatingHand/FloatingHand';
+import { PlayerPanel } from './components/PlayerPanel/PlayerPanel';
+import { Card } from './components/Card/Card';
 import { initializeGame } from './utils/gameSetup';
-import { getSection, SECTION_STARTS } from './data/cards';
+import { getSection, SECTION_STARTS, upgradeCards } from './data/cards';
 import { drawCards } from './utils/deckManager';
+import { getBotBuyDecision, getBotPlayCards, getBotDiscardCards, executeBotCards, executeBotMarketBuy } from './utils/botAI';
 import { DiceRollModal } from './components/DiceRollModal/DiceRollModal';
 import { TargetPlayerModal } from './components/TargetPlayerModal/TargetPlayerModal';
-import { CardPlayAnimation } from './components/CardPlayAnimation/CardPlayAnimation';
+import { EventRevealModal } from './components/EventRevealModal/EventRevealModal';
 import './App.css';
 
 function GameContent() {
@@ -17,19 +19,19 @@ function GameContent() {
   const [selectedCards, setSelectedCards] = useState([]);
   const [marketDrawCards, setMarketDrawCards] = useState([]);
   const [pendingMarketPiles, setPendingMarketPiles] = useState(null);
+  // 'market' = player clicked market this turn; 'upgrade' = player bought upgrade this turn
+  const [turnBuyChoice, setTurnBuyChoice] = useState(null);
   const [pendingDiceRoll, setPendingDiceRoll] = useState(null);
   const [pendingTargetSelection, setPendingTargetSelection] = useState(null);
+  const [pendingEndOfRound, setPendingEndOfRound] = useState(null);
   const boardRef = useRef(null);
-  const handRef = useRef(null);
-  const [animatingCards, setAnimatingCards] = useState(null);
-  const animationTimerRef = useRef(null);
 
-  useEffect(() => {
-    return () => { clearTimeout(animationTimerRef.current); };
-  }, []);
+  // Always keep a ref to the latest state so bot timeouts get fresh data
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
-  const handleStartGame = (playerNames) => {
-    const gameState = initializeGame(playerNames);
+  const handleStartGame = (playerNames, botIndices = []) => {
+    const gameState = initializeGame(playerNames, botIndices);
     dispatch({ type: 'INITIALIZE_GAME', payload: gameState });
   };
 
@@ -384,33 +386,128 @@ function GameContent() {
     }
   };
 
-  const handleEndTurn = () => {
-    const nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+  const handleEndTurn = (stateOverride = null) => {
+    const gs = stateOverride ?? state;
+    const nextPlayerIndex = (gs.currentPlayerIndex + 1) % gs.players.length;
     const isEndOfRound = nextPlayerIndex === 0;
+    setTurnBuyChoice(null);
 
-    if (isEndOfRound) {
-      // End of round logic would go here
+    if (!isEndOfRound) {
       dispatch({
         type: 'INITIALIZE_GAME',
         payload: {
-          ...state,
-          currentRound: state.currentRound + 1,
+          ...gs,
           currentPlayerIndex: nextPlayerIndex,
           turnPhase: 'buy',
         },
       });
-      addLog(`Round ${state.currentRound} complete! Starting round ${state.currentRound + 1}`);
-    } else {
-      dispatch({
-        type: 'INITIALIZE_GAME',
-        payload: {
-          ...state,
-          currentPlayerIndex: nextPlayerIndex,
-          turnPhase: 'buy',
-        },
+      setSelectedCards([]);
+      return;
+    }
+
+    // === END OF ROUND ===
+    const activePlayers = gs.players.filter(p => !p.isEliminated);
+
+    const anyoneInAirplane = activePlayers.some(p => getSection(p.position) === 'airplane');
+    // Non-airplane players still need event cards drawn against them
+    const nonAirplanePlayers = activePlayers.filter(p => getSection(p.position) !== 'airplane');
+    const anyoneNotInAirplane = nonAirplanePlayers.length > 0;
+    // Section of the frontmost non-airplane player determines which section the event targets
+    const nonAirplaneLeader = anyoneNotInAirplane
+      ? nonAirplanePlayers.reduce((best, p) => {
+          if (p.position > best.position) return p;
+          if (p.position === best.position && p.patience > best.patience) return p;
+          return best;
+        }, nonAirplanePlayers[0])
+      : null;
+    const eventTargetSection = nonAirplaneLeader ? getSection(nonAirplaneLeader.position) : null;
+
+    let newEventDeck = [...gs.eventDeck];
+    let newEventDiscard = [...gs.eventDiscardPile];
+    let drawnEvent = null;
+
+    // Draw an event (yellow) card whenever anyone is still in drive/security
+    if (anyoneNotInAirplane && newEventDeck.length > 0) {
+      drawnEvent = newEventDeck[0];
+      newEventDeck = newEventDeck.slice(1);
+      newEventDiscard = [...newEventDiscard, drawnEvent];
+    }
+
+    let newAnnoyanceDeck = [...gs.annoyanceDeck];
+    let newAnnoyanceDiscard = [...gs.annoyanceDiscardPile];
+    let drawnAnnoyance = null;
+
+    // Draw an annoyance card only when at least one player is in the airplane section
+    if (anyoneInAirplane && newAnnoyanceDeck.length > 0) {
+      drawnAnnoyance = newAnnoyanceDeck[0];
+      newAnnoyanceDeck = newAnnoyanceDeck.slice(1);
+      newAnnoyanceDiscard = [...newAnnoyanceDiscard, drawnAnnoyance];
+    }
+
+    let newPlayers = [...gs.players];
+    if (drawnEvent) {
+      newPlayers = newPlayers.map(player => {
+        if (player.isEliminated) return player;
+        const playerSection = getSection(player.position);
+        const isAffected = drawnEvent.affectsAll ||
+          (playerSection === eventTargetSection && playerSection !== 'airplane');
+        if (!isAffected) return player;
+        const hasEmergencyBrake = player.upgrades.some(u => u.id === 'emergency-brake');
+        const hasTSAPrecheck = player.upgrades.some(u => u.id === 'tsa-precheck');
+        if (eventTargetSection === 'drive' && hasEmergencyBrake && !drawnEvent.affectsAll) return player;
+        if (eventTargetSection === 'security' && hasTSAPrecheck && !drawnEvent.affectsAll) return player;
+        const effect = drawnEvent.effect ? drawnEvent.effect(player) : null;
+        if (!effect) return player;
+        let newPos = player.position;
+        let newPat = player.patience;
+        if (effect.moveBack) newPos = Math.max(1, player.position - effect.moveBack);
+        if (effect.patienceLoss) newPat = Math.max(0, player.patience - effect.patienceLoss);
+        return { ...player, position: newPos, patience: newPat };
       });
     }
+
+    if (drawnAnnoyance) {
+      newPlayers = newPlayers.map(player => {
+        if (player.isEliminated) return player;
+        const playerSection = getSection(player.position);
+        if (playerSection !== 'airplane') return player;
+        const effect = drawnAnnoyance.effect ? drawnAnnoyance.effect(player) : null;
+        if (!effect) return player;
+        let newPos = player.position;
+        let newPat = player.patience;
+        if (effect.moveBack) newPos = Math.max(25, player.position - effect.moveBack);
+        if (effect.patienceLoss) newPat = Math.max(0, player.patience - effect.patienceLoss);
+        return { ...player, position: newPos, patience: newPat };
+      });
+    }
+
+    const nextState = {
+      ...gs,
+      players: newPlayers,
+      currentRound: gs.currentRound + 1,
+      currentPlayerIndex: 0,
+      turnPhase: 'buy',
+      eventDeck: newEventDeck,
+      eventDiscardPile: newEventDiscard,
+      annoyanceDeck: newAnnoyanceDeck,
+      annoyanceDiscardPile: newAnnoyanceDiscard,
+      activeEvent: drawnEvent,
+      activeAnnoyance: drawnAnnoyance,
+    };
+
+    setPendingEndOfRound({ drawnEvent, drawnAnnoyance, nextState });
+    addLog(`Round ${gs.currentRound} complete!${drawnEvent ? ` Event: ${drawnEvent.name}.` : ''}${drawnAnnoyance ? ` Annoyance: ${drawnAnnoyance.name}.` : ''}`);
     setSelectedCards([]);
+  };
+
+  const handleEndOfRoundConfirm = () => {
+    const { nextState } = pendingEndOfRound;
+    setPendingEndOfRound(null);
+    dispatch({
+      type: 'INITIALIZE_GAME',
+      payload: nextState,
+    });
+    addLog(`Starting round ${nextState.currentRound}`);
   };
 
   const handleBuyUpgrade = (upgrade) => {
@@ -421,8 +518,8 @@ function GameContent() {
       return;
     }
 
-    if (currentPlayer.upgrades.some(u => u.id === upgrade.id)) {
-      addLog(`Already own ${upgrade.name}!`);
+    if (state.players.some(p => p.upgrades.some(u => u.id === upgrade.id))) {
+      addLog(`${upgrade.name} is already taken!`);
       return;
     }
 
@@ -443,12 +540,14 @@ function GameContent() {
     });
 
     addLog(`${currentPlayer.name} bought upgrade: ${upgrade.name} (cost ${upgrade.cost} patience)`);
+    setTurnBuyChoice('upgrade');
   };
 
   const handleDrawMarket = () => {
+    if (state.turnPhase !== 'buy') return;
     const currentPlayer = state.players[state.currentPlayerIndex];
 
-    if (currentPlayer.patience < 1) {
+    if (currentPlayer.patience < 2) {
       addLog('Not enough patience to draw from market!');
       return;
     }
@@ -463,18 +562,19 @@ function GameContent() {
     // Store drawn cards for display — save the new pile state for when player chooses
     setMarketDrawCards(result.drawnCards);
     setPendingMarketPiles({ drawPile: result.newDrawPile, discardPile: result.newDiscardPile });
+    setTurnBuyChoice('market');
   };
 
   const handleBuyMarketCard = (chosenCard) => {
     const currentPlayer = state.players[state.currentPlayerIndex];
     if (!pendingMarketPiles) return;
 
-    // Add chosen card to hand, discard the other(s), deduct 1 patience
+    // Add chosen card to hand, discard the other(s), deduct 2 patience
     const otherCards = marketDrawCards.filter(c => c.id !== chosenCard.id);
     const newPlayers = [...state.players];
     newPlayers[state.currentPlayerIndex] = {
       ...currentPlayer,
-      patience: currentPlayer.patience - 1,
+      patience: currentPlayer.patience - 2,
       hand: [...currentPlayer.hand, chosenCard],
     };
 
@@ -494,6 +594,23 @@ function GameContent() {
     setPendingMarketPiles(null);
   };
 
+  const handleCancelMarket = () => {
+    if (pendingMarketPiles) {
+      // Return drawn cards to market discard pile so deck isn't depleted
+      dispatch({
+        type: 'INITIALIZE_GAME',
+        payload: {
+          ...state,
+          marketDrawPile: pendingMarketPiles.drawPile,
+          marketDiscardPile: [...pendingMarketPiles.discardPile, ...marketDrawCards],
+        },
+      });
+    }
+    setMarketDrawCards([]);
+    setPendingMarketPiles(null);
+    setTurnBuyChoice(null);
+  };
+
   const addLog = (message) => {
     dispatch({
       type: 'ADD_LOG',
@@ -501,95 +618,345 @@ function GameContent() {
     });
   };
 
-  const handlePlayCardsWithAnimation = () => {
-    // Animation only runs during the play phase; discard etc. pass through directly
-    if (selectedCards.length === 0 || state.turnPhase !== 'play') {
-      handlePlayCards();
-      return;
+  // Execute one phase of a bot's turn using explicit gameState (no stale closure risk)
+  const executeBotPhase = (gs, bot) => {
+    switch (gs.turnPhase) {
+      case 'buy': {
+        const decision = getBotBuyDecision(bot, gs);
+        if (decision.type === 'upgrade') {
+          const newPlayers = [...gs.players];
+          const idx = newPlayers.findIndex(p => p.id === bot.id);
+          newPlayers[idx] = {
+            ...bot,
+            patience: bot.patience - decision.upgrade.cost,
+            upgrades: [...bot.upgrades, decision.upgrade],
+          };
+          dispatch({ type: 'INITIALIZE_GAME', payload: { ...gs, players: newPlayers, turnPhase: 'play' } });
+          addLog(`${bot.name} bought upgrade: ${decision.upgrade.name}`);
+        } else if (decision.type === 'market') {
+          const result = executeBotMarketBuy(gs, bot);
+          if (result) {
+            dispatch({
+              type: 'INITIALIZE_GAME',
+              payload: {
+                ...gs,
+                players: result.newPlayers,
+                marketDrawPile: result.marketDrawPile,
+                marketDiscardPile: result.marketDiscardPile,
+                turnPhase: 'play',
+              },
+            });
+            addLog(`${bot.name} bought from market: ${result.chosenCard.name}`);
+          } else {
+            dispatch({ type: 'INITIALIZE_GAME', payload: { ...gs, turnPhase: 'play' } });
+          }
+        } else {
+          dispatch({ type: 'INITIALIZE_GAME', payload: { ...gs, turnPhase: 'play' } });
+        }
+        break;
+      }
+
+      case 'play': {
+        const cardsToPlay = getBotPlayCards(bot, gs);
+        if (cardsToPlay.length === 0) {
+          dispatch({ type: 'INITIALIZE_GAME', payload: { ...gs, turnPhase: 'discard' } });
+          addLog(`${bot.name} skips play phase`);
+        } else {
+          const { newPlayers, newBasicDiscard, logParts } = executeBotCards(cardsToPlay, gs, bot);
+          dispatch({
+            type: 'INITIALIZE_GAME',
+            payload: { ...gs, players: newPlayers, basicDiscardPile: newBasicDiscard, turnPhase: 'discard' },
+          });
+          addLog(`${bot.name} played: ${logParts.join(', ')}`);
+        }
+        break;
+      }
+
+      case 'discard': {
+        const toDiscard = getBotDiscardCards(bot);
+        const newPlayers = [...gs.players];
+        const botIdx = newPlayers.findIndex(p => p.id === bot.id);
+        let updatedBot = bot;
+        if (toDiscard.length > 0) {
+          updatedBot = { ...bot, hand: bot.hand.filter(c => !toDiscard.some(d => d.id === c.id)) };
+          newPlayers[botIdx] = updatedBot;
+          addLog(`${bot.name} discarded: ${toDiscard.map(c => c.name).join(', ')}`);
+        }
+
+        // Draw inline to avoid closure issues with handleDrawPhase
+        const cardsToDraw = Math.max(0, 6 - updatedBot.hand.length);
+        let drawPile = [...gs.basicDrawPile];
+        let discardPile = [...gs.basicDiscardPile, ...toDiscard];
+
+        if (cardsToDraw > 0) {
+          const result = drawCards(drawPile, discardPile, cardsToDraw);
+          newPlayers[botIdx] = { ...updatedBot, hand: [...updatedBot.hand, ...result.drawnCards] };
+          drawPile = result.newDrawPile;
+          discardPile = result.newDiscardPile;
+        }
+
+        dispatch({
+          type: 'INITIALIZE_GAME',
+          payload: { ...gs, players: newPlayers, basicDrawPile: drawPile, basicDiscardPile: discardPile, turnPhase: 'draw' },
+        });
+        break;
+      }
+
+      case 'draw': {
+        handleEndTurn(gs);
+        break;
+      }
+
+      default:
+        break;
     }
-    // Prevent double-play if animation already in flight
-    if (animatingCards !== null) return;
-
-    const cardRects = handRef.current?.getCardRects(selectedCards.map(c => c.id)) ?? [];
-    const boardRect = boardRef.current?.getBoundingClientRect();
-    const endX = boardRect ? boardRect.left + boardRect.width / 2 : window.innerWidth / 2;
-    const endY = boardRect ? boardRect.top + boardRect.height / 2 : window.innerHeight / 2;
-
-    const cards = selectedCards.map((card, i) => ({
-      card,
-      startX: cardRects[i]?.left ?? window.innerWidth / 2,
-      startY: cardRects[i]?.top ?? window.innerHeight,
-      endX,
-      endY,
-    }));
-
-    setAnimatingCards(cards);
-
-    animationTimerRef.current = setTimeout(() => {
-      setAnimatingCards(null);
-      handlePlayCards();
-    }, 600);
   };
+
+  // Bot auto-play: fire whenever it's a bot's turn and the phase changes
+  useEffect(() => {
+    const currentPlayer = state.players[state.currentPlayerIndex];
+    if (!currentPlayer?.isBot || state.gameStatus !== 'playing') return;
+    if (pendingDiceRoll || pendingTargetSelection || pendingEndOfRound) return;
+
+    const timer = setTimeout(() => {
+      const latestState = stateRef.current;
+      const latestBot = latestState.players[latestState.currentPlayerIndex];
+      if (!latestBot?.isBot) return;
+      executeBotPhase(latestState, latestBot);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.currentPlayerIndex, state.turnPhase, state.gameStatus]);
 
   if (state.gameStatus === 'setup') {
     return <StartScreen onStartGame={handleStartGame} />;
   }
 
   const currentPlayer = state.players[state.currentPlayerIndex];
+  const threeTokens = Math.floor(currentPlayer.patience / 3);
+  const oneTokens   = currentPlayer.patience % 3;
 
   return (
-    <div className="game-container">
-      <div className="game-header">
-        <div className="game-header-inner">
-          <div className="game-header-plane">
-            <img src="/assets/board/PlaneUp.png" alt="" />
+    <div className="game-layout">
+
+      {/* ── Main play area ── */}
+      <div className="play-area">
+
+        {/* Left: Game Board (within fixed 820px area, 244px left offset) */}
+        <div className="board-area">
+          <GameBoard
+            players={state.players}
+            boardRef={boardRef}
+            eventDiscardPile={state.eventDiscardPile}
+            annoyanceDiscardPile={state.annoyanceDiscardPile}
+          />
+        </div>
+
+        {/* Right: Info panels */}
+        <div className="right-column">
+
+          {/* Round indicator bar */}
+          <div className="round-bar-wrapper">
+            <div className="round-bar-pin round-bar-pin--left">
+              <img src="/assets/board/vector42.svg" alt="" />
+            </div>
+            <div className="round-bar-pin round-bar-pin--right">
+              <img src="/assets/board/vector42.svg" alt="" />
+            </div>
+            <div className="round-bar">
+              <div className="round-icon-box">
+                <img src="/assets/board/round-plane-left.png" alt="" />
+              </div>
+              <span className="round-text">Round: {state.currentRound}</span>
+              <div className="round-icon-box">
+                <img src="/assets/board/round-plane-right.png" alt="" />
+              </div>
+            </div>
           </div>
-          <span className="game-header-round">ROUND: {state.currentRound}</span>
-          <div className="game-header-plane">
-            <img src="/assets/board/PlaneDown.png" alt="" />
+
+          {/* Player panels + Game log/Upgrades */}
+          <div className="right-content">
+
+            {/* Left sub-column: 4 player panels */}
+            <div className="players-column">
+              {state.players.map((player, i) => (
+                <PlayerPanel
+                  key={player.id}
+                  player={player}
+                  playerIndex={i}
+                  isCurrentPlayer={i === state.currentPlayerIndex}
+                />
+              ))}
+            </div>
+
+            {/* Right sub-column: game log + upgrades */}
+            <div className="log-upgrades-column">
+              <GameStatus
+                gameLog={state.gameLog}
+              />
+              <div className="upgrades-panel">
+                <p className="upgrades-title">UPGRADES</p>
+                {upgradeCards.map((upgrade) => {
+                  const takenByPlayer = state.players.find(p => p.upgrades.some(u => u.id === upgrade.id));
+                  const taken = !!takenByPlayer;
+                  const ownedByMe = currentPlayer.upgrades.some(u => u.id === upgrade.id);
+                  const canAfford = currentPlayer.patience >= upgrade.cost;
+                  const boughtThisTurn = turnBuyChoice !== null;
+                  const canBuy = state.turnPhase === 'buy' && !taken && canAfford && !boughtThisTurn && !currentPlayer.isBot;
+                  const isBlocked = !taken && boughtThisTurn;
+                  const slotClass = [
+                    'upgrade-card-slot',
+                    taken ? 'upgrade-owned' : '',
+                    !taken && !canAfford && !boughtThisTurn ? 'upgrade-unaffordable' : '',
+                    canBuy ? 'upgrade-buyable' : '',
+                    isBlocked ? 'upgrade-market-blocked' : '',
+                  ].filter(Boolean).join(' ');
+                  return (
+                    <div
+                      key={upgrade.id}
+                      className={slotClass}
+                      onClick={canBuy ? () => handleBuyUpgrade(upgrade) : undefined}
+                    >
+                      <Card card={upgrade} size="tiny" showTooltip />
+                      {taken && <div className="upgrade-owned-badge">{ownedByMe ? '✓' : takenByPlayer.name.split(' ')[0]}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div className="game-main">
-        <GameBoard
-          players={state.players}
-          currentRound={state.currentRound}
-          eventDiscardPile={state.eventDiscardPile}
-          annoyanceDiscardPile={state.annoyanceDiscardPile}
-          activeEvent={state.activeEvent}
-          activeAnnoyance={state.activeAnnoyance}
-          boardRef={boardRef}
-        />
 
-        <GameStatus
-          gameLog={state.gameLog}
-          activeEvent={state.activeEvent}
-          activeAnnoyance={state.activeAnnoyance}
-          eventDiscardPile={state.eventDiscardPile}
-          annoyanceDiscardPile={state.annoyanceDiscardPile}
-        />
+      {/* ── Bottom row ── */}
+      <div className="bottom-row">
+
+        {/* YOUR HAND */}
+        <div className="hand-panel">
+          <div className="hand-panel-header">
+            <p className="panel-label">
+              {currentPlayer.isBot
+                ? `${currentPlayer.name.toUpperCase()} IS PLAYING...`
+                : `YOUR HAND — ${state.turnPhase.toUpperCase()} PHASE`}
+            </p>
+            {!currentPlayer.isBot && (
+              <div className="hand-action-buttons">
+                {state.turnPhase === 'buy' && (
+                  <button className="hand-action-btn" onClick={handleSkipPhase}>SKIP BUY</button>
+                )}
+                {state.turnPhase === 'play' && (
+                  <>
+                    <button
+                      className="hand-action-btn hand-action-btn--primary"
+                      onClick={handlePlayCards}
+                      disabled={selectedCards.length === 0}
+                    >
+                      PLAY {selectedCards.length > 0 ? `(${selectedCards.length})` : ''}
+                    </button>
+                    <button className="hand-action-btn" onClick={handleSkipPhase}>SKIP</button>
+                  </>
+                )}
+                {state.turnPhase === 'discard' && (
+                  <>
+                    {selectedCards.length > 0 && (
+                      <button className="hand-action-btn hand-action-btn--primary" onClick={handlePlayCards}>
+                        DISCARD ({selectedCards.length})
+                      </button>
+                    )}
+                    <button className="hand-action-btn" onClick={handleSkipPhase}>KEEP ALL</button>
+                  </>
+                )}
+                {state.turnPhase === 'draw' && (
+                  <button className="hand-action-btn hand-action-btn--primary" onClick={() => handleEndTurn()}>
+                    END TURN
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="hand-cards">
+            {currentPlayer.hand.map((card, i) => {
+              const isSelected = selectedCards.some(sc => sc.id === card.id);
+              const isInteractive = !currentPlayer.isBot &&
+                (state.turnPhase === 'play' || state.turnPhase === 'discard');
+              return (
+                <div
+                  key={`${card.id}-${i}`}
+                  className={`hand-card-wrap${isSelected ? ' hand-card-selected' : ''}${isInteractive ? ' hand-card-interactive' : ''}`}
+                  onClick={isInteractive ? () => handleCardClick(card) : undefined}
+                >
+                  <img
+                    src={card.imagePath}
+                    alt={card.name}
+                    className="hand-card-img"
+                    onError={(e) => { e.target.style.opacity = '0'; }}
+                  />
+                  <div className="hand-card-bubble">
+                    <p className="hand-card-bubble-text market-bubble-name">{card.name.toUpperCase()}</p>
+                    <p className="hand-card-bubble-text market-bubble-desc">{card.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+            {Array(Math.max(0, 7 - currentPlayer.hand.length)).fill(null).map((_, i) => (
+              <div key={`empty-${i}`} className="hand-empty-slot" />
+            ))}
+          </div>
+        </div>
+
+        {/* YOUR PATIENCE */}
+        <div className="patience-panel">
+          <p className="panel-label">YOUR PATIENCE</p>
+          <div className="patience-tokens">
+            <div className="token-row">
+              {Array(threeTokens).fill(null).map((_, i) => (
+                <div key={i} className="token token-3">3</div>
+              ))}
+            </div>
+            <div className="token-row">
+              {Array(oneTokens).fill(null).map((_, i) => (
+                <div key={i} className="token token-1">1</div>
+              ))}
+            </div>
+          </div>
+          <p className="patience-total">TOTAL: {currentPlayer.patience}</p>
+        </div>
+
+        {/* BUY MARKET CARD */}
+        <div className="market-panel">
+          <p className="panel-label">BUY MARKET CARD: 1 PATIENCE COST</p>
+          {marketDrawCards.length > 0 ? (
+            <>
+              <div className="market-drawn-cards">
+                {marketDrawCards.map(card => (
+                  <div key={card.id} className="market-card-wrap" onClick={() => handleBuyMarketCard(card)}>
+                    <img
+                      src={card.imagePath}
+                      alt={card.name}
+                      className="market-drawn-card"
+                    />
+                    <div className="hand-card-bubble market-card-bubble">
+                      <p className="hand-card-bubble-text market-bubble-name">{card.name.toUpperCase()}</p>
+                      <p className="hand-card-bubble-text market-bubble-desc">{card.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button className="market-cancel-btn" onClick={handleCancelMarket}>✕</button>
+            </>
+          ) : (
+            <img
+              src="/assets/cards/MarketBack.png"
+              alt="Market"
+              className={`market-card-img${turnBuyChoice !== null ? ' market-card-blocked' : ''}`}
+              onClick={turnBuyChoice !== null ? undefined : handleDrawMarket}
+            />
+          )}
+        </div>
       </div>
-      <FloatingHand
-        ref={handRef}
-        player={currentPlayer}
-        playerIndex={state.currentPlayerIndex}
-        selectedCards={selectedCards}
-        onCardClick={handleCardClick}
-        isCurrentPlayer={true}
-        turnPhase={state.turnPhase}
-        upgradeCards={state.upgradeCards}
-        onBuyUpgrade={handleBuyUpgrade}
-        onDrawMarket={handleDrawMarket}
-        onBuyMarketCard={handleBuyMarketCard}
-        onPlayCards={handlePlayCardsWithAnimation}
-        onSkipPhase={handleSkipPhase}
-        onEndTurn={handleEndTurn}
-        marketDrawCards={marketDrawCards}
-        animatingCardIds={animatingCards ? animatingCards.map(a => a.card.id) : []}
-      />
-      {animatingCards && (
-        <CardPlayAnimation animatingCards={animatingCards} />
-      )}
+
+      {/* ── Modals ── */}
       {pendingDiceRoll && (
         <DiceRollModal
           diceCards={pendingDiceRoll.diceCards}
@@ -601,6 +968,13 @@ function GameContent() {
           players={state.players}
           currentPlayerIndex={state.currentPlayerIndex}
           onConfirm={handleTargetConfirm}
+        />
+      )}
+      {pendingEndOfRound && (
+        <EventRevealModal
+          drawnEvent={pendingEndOfRound.drawnEvent}
+          drawnAnnoyance={pendingEndOfRound.drawnAnnoyance}
+          onConfirm={handleEndOfRoundConfirm}
         />
       )}
     </div>

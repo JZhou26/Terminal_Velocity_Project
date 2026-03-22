@@ -20,7 +20,7 @@
 .subtitle {
   margin: 0 0 0.75rem 0;
   font-size: 1rem;
-  color: #FFC107;
+  color: #FFD700;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -74,7 +74,7 @@
 .deckText {
   margin: 0.5rem 0 0 0;
   font-size: 0.875rem;
-  color: #FFC107;
+  color: #FFD700;
   font-weight: 700;
   text-transform: uppercase;
 }

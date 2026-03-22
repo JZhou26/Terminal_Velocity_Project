@@ -23,7 +23,7 @@ export function CardPlayAnimation({ animatingCards }) {
   return createPortal(
     <div className={styles.overlay}>
       {animatingCards.map(({ card, startX, startY, endX, endY }) => {
-        const cardWidth = 90;
+        const cardWidth = 65;
         // translate from start position to end position (centered on board center)
         const cardHeight = cardWidth * 1.4;
         const dx = endX - startX - cardWidth / 2;

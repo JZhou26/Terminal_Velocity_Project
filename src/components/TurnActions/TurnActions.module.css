@@ -28,7 +28,7 @@
 .instruction {
   margin: 0;
   font-size: 1rem;
-  color: #FFC107;
+  color: #FFD700;
   font-weight: 700;
 }
 
@@ -85,8 +85,8 @@
 
 .buttonSecondary:hover {
   background: rgba(255, 215, 0, 0.1);
-  border-color: #FFC107;
-  color: #FFC107;
+  border-color: #FFD700;
+  color: #FFD700;
 }
 
 .buttonSecondary:active {
